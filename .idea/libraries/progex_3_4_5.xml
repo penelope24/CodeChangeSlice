@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="progex-3.4.5">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../opensource/progex/target/progex-3.4.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

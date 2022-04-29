@@ -1,0 +1,42 @@
+package fy;
+
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import fy.utils.file.DirTraveler;
+import ghaffarian.progex.graphs.cfg.CFGBuilder;
+import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
+import ghaffarian.progex.graphs.cfg.ICFGBuilder;
+import ghaffarian.progex.graphs.pdg.PDGBuilder;
+import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+public class TestUtils {
+
+    public static List<String> getPaths(String base) {
+        return DirTraveler.findAllJavaFiles(base);
+    }
+
+    public static ProgramDependeceGraph generatePDG (String path) throws IOException {
+        String[] paths = new String[1];
+        paths[0] = path;
+        return PDGBuilder.buildForAll("Java", paths)[0];
+    }
+
+    public static ControlFlowGraph generateICFG(String base) throws IOException {
+        String[] paths = getPaths(base).toArray(new String[0]);
+        return ICFGBuilder.buildForAll("Java", paths);
+    }
+
+    public static ControlFlowGraph generateCFG(String path) throws IOException {
+        String[] paths = new String[1];
+        paths[0] = path;
+        return CFGBuilder.build("Java", path);
+    }
+
+
+}
