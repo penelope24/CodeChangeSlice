@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import fy.commit.repr.AtomEdit;
 import fy.utils.custom.CustomSeparator;
 import ghaffarian.graphs.DepthFirstTraversal;
 import ghaffarian.graphs.GraphTraversal;
@@ -28,6 +29,7 @@ public class PDGInfo {
     public CompilationUnit cu;
     public String abs_path;
     public String rel_path;
+    public List<AtomEdit> atomEdits;
     public Map<String, PDNode> uid2ddNodes = new LinkedHashMap<>();
     public Map<String, PDNode> uid2cdNodes = new LinkedHashMap<>();
     public Map<String, CFNode> uid2cfNodes = new LinkedHashMap<>();
@@ -161,5 +163,9 @@ public class PDGInfo {
 
     public void addCallingRelation(CFNode caller, CFNode callee) {
         this.callingMap.put(caller, callee);
+    }
+
+    public void setAtomEdits(List<AtomEdit> atomEdits) {
+        this.atomEdits = atomEdits;
     }
 }

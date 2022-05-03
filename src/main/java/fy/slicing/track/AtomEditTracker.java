@@ -1,5 +1,6 @@
 package fy.slicing.track;
 
+import fy.commit.repr.AtomEdit;
 import fy.progex.parse.PDGInfo;
 import fy.slicing.repr.SliceSubGraph;
 import fy.slicing.result.CDGTrackResult;
@@ -10,9 +11,11 @@ import ghaffarian.progex.graphs.pdg.PDNode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PDGTracker {
+public class AtomEditTracker {
 
-    public static SliceSubGraph track(PDGInfo pdgInfo, List<Integer> editLines) {
+    public static SliceSubGraph track (AtomEdit atomEdit) {
+        List<Integer> editLines = atomEdit.editLines;
+        PDGInfo pdgInfo = atomEdit.pdgInfo;
         List<PDNode> startNodes = new ArrayList<>();
         editLines.forEach(line -> {
             PDNode startNode = pdgInfo.ddg.copyVertexSet().stream()

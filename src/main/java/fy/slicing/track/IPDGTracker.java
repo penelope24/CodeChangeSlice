@@ -1,6 +1,7 @@
 package fy.slicing.track;
 
-import fy.progex.parse.PDGInfo;
+import fy.commit.repr.AtomEdit;
+import fy.progex.graphs.IPDG;
 import fy.slicing.repr.SliceGraph;
 import fy.slicing.repr.SliceSubGraph;
 import ghaffarian.graphs.Edge;
@@ -10,11 +11,17 @@ import ghaffarian.progex.graphs.cfg.CFNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class InterPDGTracker {
+public class IPDGTracker {
 
-    public static SliceGraph track(List<SliceSubGraph> subGraphs) {
+    public static SliceGraph track(IPDG ipdg) {
+        List<SliceSubGraph> subGraphs = new ArrayList<>();
+        ipdg.pdgInfoList.forEach(pdgInfo -> {
+            pdgInfo.atomEdits.forEach(atomEdit -> {
+                SliceSubGraph subGraph = AtomEditTracker.track(atomEdit);
+                subGraphs.add(subGraph);
+            });
+        });
         SliceGraph sliceGraph = new SliceGraph(subGraphs);
         subGraphs.forEach(sliceSubGraph -> {
             String path = sliceSubGraph.pdgInfo.abs_path;

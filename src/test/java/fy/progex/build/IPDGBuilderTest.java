@@ -12,8 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class IPDGBuilderTest {
     String base = "/Users/fy/Documents/data/slicing_cases/cases/icfg2";
     String output = "/Users/fy/Documents/data/slicing_cases/output";
@@ -25,7 +23,6 @@ class IPDGBuilderTest {
         typeSolver.add(new ReflectionTypeSolver());
         typeSolver.add(new JavaParserTypeSolver(new File(base)));
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(typeSolver);
-        IPDG ipdg = IPDGBuilder.buildForAll(paths.toArray(new String[0]), symbolSolver);
-        ipdg.exportDOT(output);
+
     }
 }

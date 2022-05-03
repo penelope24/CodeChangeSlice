@@ -9,7 +9,6 @@ import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
 import ghaffarian.progex.graphs.pdg.DDEdge;
 import ghaffarian.progex.graphs.pdg.PDNode;
 
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

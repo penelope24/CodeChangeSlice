@@ -1,6 +1,5 @@
 package fy.slicing.repr;
 
-import fy.progex.parse.PDGInfo;
 import ghaffarian.graphs.Edge;
 import ghaffarian.progex.graphs.AbstractProgramGraph;
 import ghaffarian.progex.graphs.cfg.CFEdge;

@@ -4,13 +4,15 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import com.github.javaparser.utils.Pair;
+import fy.commit.repr.CommitDiff;
 import fy.progex.build.IPDGBuilder;
 import fy.progex.graphs.IPDG;
 import fy.utils.jgit.JGitUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -27,14 +29,14 @@ import java.util.stream.Collectors;
 public class CommitParser {
     Repository repository;
     JGitUtils jgit;
+    List<CommitDiff> commitDiffs = new ArrayList<>();
 
     public CommitParser(Repository repository, JGitUtils jgit) {
         this.repository = repository;
         this.jgit = jgit;
     }
 
-    public List<Pair<IPDG, IPDG>> parse (List<RevCommit> commits) throws GitAPIException, IOException {
-        List<Pair<IPDG, IPDG>> result = new ArrayList<>();
+    public void parse (List<RevCommit> commits) throws GitAPIException, IOException {
         for (RevCommit commit : commits) {
             RevCommit par = getMainParent(repository, commit);
             if (par == null) {
@@ -64,7 +66,8 @@ public class CommitParser {
                 }
                 try {
                     JavaSymbolSolver symbolSolver1 = new JavaSymbolSolver(typeSolver1);
-                    ipdg1 = IPDGBuilder.buildForAll(validPaths1.toArray(new String[0]), symbolSolver1);
+                    IPDGBuilder builder1 = new IPDGBuilder("v1", repository, validEntries, validPaths1, symbolSolver1);
+                    ipdg1 = builder1.build();
                 } catch (Exception e) {
                     ipdg1 = null;
                 }
@@ -80,18 +83,17 @@ public class CommitParser {
                 }
                 try {
                     JavaSymbolSolver symbolSolver2 = new JavaSymbolSolver(typeSolver2);
-                    ipdg2 = IPDGBuilder.buildForAll(validPaths2.toArray(new String[0]), symbolSolver2);
+                    IPDGBuilder builder2 = new IPDGBuilder("v2", repository, validEntries, validPaths2, symbolSolver2);
+                    ipdg2 = builder2.build();
                 } catch (Exception e) {
                     ipdg2 = null;
                 }
-                // fed to result
+                // add to result
                 if (ipdg1 != null && ipdg2 != null) {
-                    Pair<IPDG, IPDG> pair = new Pair<>(ipdg1, ipdg2);
-                    result.add(pair);
+
                 }
             }
         }
-        return result;
     }
 
     /**
@@ -141,5 +143,12 @@ public class CommitParser {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private EditList getEditList(DiffEntry diffEntry) throws IOException {
+        DiffFormatter diffFormatter = new DiffFormatter(null);
+        diffFormatter.setContext(0);
+        diffFormatter.setRepository(repository);
+        return diffFormatter.toFileHeader(diffEntry).toEditList();
     }
 }

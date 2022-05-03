@@ -1,9 +1,5 @@
 package fy;
 
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import fy.utils.file.DirTraveler;
 import ghaffarian.progex.graphs.cfg.CFGBuilder;
 import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
@@ -11,7 +7,6 @@ import ghaffarian.progex.graphs.cfg.ICFGBuilder;
 import ghaffarian.progex.graphs.pdg.PDGBuilder;
 import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
