@@ -7,14 +7,59 @@
       <option name="url" value="https://repo.maven.apache.org/maven2" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="file:$PROJECT_DIR$/../../opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jitpack.io" />
+      <option name="name" value="jitpack.io" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="file://$PROJECT_DIR$/../../opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Maven Central repository" />
       <option name="url" value="https://repo1.maven.org/maven2" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="repo" />
+      <option name="name" value="repo" />
+      <option name="url" value="file://$PROJECT_DIR$/../../opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jgit-repository" />
+      <option name="name" value="jgit-repository" />
+      <option name="url" value="https://repo.eclipse.org/content/groups/releases/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="file:Users/fy/Documents/opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="Users/fy/Documents/opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="$PROJECT_DIR$/../../opensource/graphs" />
     </remote-repository>
   </component>
 </project>

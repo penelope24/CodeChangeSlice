@@ -33,5 +33,16 @@ public class TestCustomCases {
 //        System.out.println(commits.size());
         CommitParser parser = new CommitParser(repository, jgit);
         parser.parse(commits);
+        System.out.println(parser.commitDiffs.size());
+    }
+
+    @Test
+    void run_single() throws GitAPIException {
+        GitHistoryWalker walker = new GitHistoryWalker(project_path, output_path);
+        walker.walk();
+        List<RevCommit> commits = walker.allCommits;
+        commits.removeIf(revCommit -> !revCommit.getId().name().equals("773a3667eb064b19f337a54364a917c432b4d8d8"));
+        System.out.println(commits.size());
+        CommitParser parser = new CommitParser(repository, jgit);
     }
 }

@@ -10,7 +10,7 @@ import java.util.Objects;
  *  将IPDG信息与每一个edit联系在一起
  */
 public class CommitDiff {
-    RevCommit commit;
+    public RevCommit commit;
     public IPDG ipdg1;
     public IPDG ipdg2;
 

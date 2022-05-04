@@ -19,4 +19,5 @@ public class AtomEdit {
         this.pdgInfo = pdgInfo;
         this.editLines = editLines;
     }
+
 }

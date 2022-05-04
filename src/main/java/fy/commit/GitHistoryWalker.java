@@ -13,12 +13,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GitHistoryWalker {
-    String project_path;
-    String output_path;
-    Repository repository;
-    JGitUtils jgit;
+    public String project_path;
+    public String output_path;
+    public Repository repository;
+    public JGitUtils jgit;
     // res
-    List<RevCommit> allCommits = new LinkedList<>();
+    public List<RevCommit> allCommits = new LinkedList<>();
 
     public GitHistoryWalker(String project_path, String output_path) {
         this.project_path = project_path;

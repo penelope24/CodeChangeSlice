@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Main-Class: fy.App
+Class-Path: JavaEWAH-1.1.7.jar progex-3.4.5.jar commons-compress-1.19.ja
+ r commons-io-2.9.0.jar guava-31.0.1-jre.jar nano-logger-1.1.jar antlr-r
+ untime-3.5.2.jar javassist-3.28.0-GA.jar javaparser-core-3.22.1.jar org
+ .eclipse.jgit-5.9.0.202009080501-r.jar org.osgi.core-4.3.1.jar antlr4-4
+ .6.jar graphs-2.5.0.jar fyCommons-1.0-SNAPSHOT.jar commons-collections4
+ -4.4.jar checker-qual-3.12.0.jar org.eclipse.jgit.archive-5.9.0.2020090
+ 80501-r.jar javax.json-1.0.4.jar commons-lang3-3.8.jar jzlib-1.1.1.jar 
+ javaparser-symbol-solver-core-3.22.1.jar ST4-4.0.8.jar slf4j-api-1.7.2.
+ jar jsr305-3.0.2.jar failureaccess-1.0.1.jar j2objc-annotations-1.3.jar
+  org.eclipse.jgit.ssh.jsch-5.9.0.202009080501-r.jar listenablefuture-99
+ 99.0-empty-to-avoid-conflict-with-guava.jar error_prone_annotations-2.7
+ .1.jar antlr4-runtime-4.6.jar annotations-23.0.0.jar org.abego.treelayo
+ ut.core-1.0.3.jar jsch-0.1.55.jar diff-match-patch-1.2.jar
+

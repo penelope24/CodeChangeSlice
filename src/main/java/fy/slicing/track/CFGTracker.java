@@ -21,7 +21,7 @@ public class CFGTracker {
     List<Integer> editedLines;
     DDGTrackResult<PDNode, DDEdge> ddgTrackResult;
     CDGTrackResult<PDNode> cdgTrackResult;
-    CFGTrackResult<PDNode,DDEdge,CFNode,CFEdge> cfgTrackResult;
+    CFGTrackResult<PDNode,DDEdge,CFNode,CFEdge> cfgTrackResult = new CFGTrackResult<>();
     boolean for_test = false;
     CFNode root;
     Set<CFNode> dataBindNodes;

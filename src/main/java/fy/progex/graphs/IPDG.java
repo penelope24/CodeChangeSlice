@@ -2,6 +2,7 @@ package fy.progex.graphs;
 
 import fy.progex.parse.PDGInfo;
 import fy.progex.utils.export.DotPalette;
+
 import ghaffarian.graphs.Edge;
 import ghaffarian.nanologger.Logger;
 import ghaffarian.progex.graphs.AbstractProgramGraph;
@@ -23,6 +24,7 @@ import java.util.*;
  *  inter-procedure program dependency graph
  */
 public class IPDG extends AbstractProgramGraph<CFNode, CFEdge> {
+
     public ControlFlowGraph icfg;
     public List<PDGInfo> pdgInfoList;
     public Set<PDNode> dataNodes = new LinkedHashSet<>();
@@ -110,4 +112,5 @@ public class IPDG extends AbstractProgramGraph<CFNode, CFEdge> {
     public void exportJSON(String s) throws IOException {
 
     }
+
 }

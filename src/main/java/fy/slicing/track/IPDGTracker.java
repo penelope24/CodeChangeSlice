@@ -7,6 +7,7 @@ import fy.slicing.repr.SliceSubGraph;
 import ghaffarian.graphs.Edge;
 import ghaffarian.progex.graphs.cfg.CFEdge;
 import ghaffarian.progex.graphs.cfg.CFNode;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +15,17 @@ import java.util.Map;
 
 public class IPDGTracker {
 
-    public static SliceGraph track(IPDG ipdg) {
+    public static SliceGraph track(IPDG ipdg, RevCommit commit, int type) {
         List<SliceSubGraph> subGraphs = new ArrayList<>();
         ipdg.pdgInfoList.forEach(pdgInfo -> {
             pdgInfo.atomEdits.forEach(atomEdit -> {
-                SliceSubGraph subGraph = AtomEditTracker.track(atomEdit);
-                subGraphs.add(subGraph);
+                if (!atomEdit.editLines.isEmpty()) {
+                    SliceSubGraph subGraph = AtomEditTracker.track(atomEdit);
+                    subGraphs.add(subGraph);
+                }
             });
         });
-        SliceGraph sliceGraph = new SliceGraph(subGraphs);
+        SliceGraph sliceGraph = new SliceGraph(subGraphs, commit, type);
         subGraphs.forEach(sliceSubGraph -> {
             String path = sliceSubGraph.pdgInfo.abs_path;
             Map<CFNode,CFNode> callMap = sliceSubGraph.pdgInfo.callingMap;

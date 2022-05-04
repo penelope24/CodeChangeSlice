@@ -1,0 +1,10 @@
+### run-single:
+
+java -jar ProgramGraphs.jar -type single -project /Users/fy/Documents/cc2vec/slicing_change_cases -output /Users/fy/Documents/cc2vec/slicing_change_cases/output
+
+java -jar ProgramGraphs.jar -type single -project /Users/fy/Documents/cc2vec/test/spring-data-cassandra
+ -output /Users/fy/Documents/cc2vec/slicing_change_cases/cassandra_output
+
+
+
+### run-all:

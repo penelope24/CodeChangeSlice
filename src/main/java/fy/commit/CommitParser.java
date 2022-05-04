@@ -11,8 +11,6 @@ import fy.utils.jgit.JGitUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -20,16 +18,15 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CommitParser {
-    Repository repository;
-    JGitUtils jgit;
-    List<CommitDiff> commitDiffs = new ArrayList<>();
+    public Repository repository;
+    public JGitUtils jgit;
+    public List<CommitDiff> commitDiffs = new ArrayList<>();
 
     public CommitParser(Repository repository, JGitUtils jgit) {
         this.repository = repository;
@@ -38,6 +35,7 @@ public class CommitParser {
 
     public void parse (List<RevCommit> commits) throws GitAPIException, IOException {
         for (RevCommit commit : commits) {
+            System.out.println(commit);
             RevCommit par = getMainParent(repository, commit);
             if (par == null) {
                 continue;
@@ -57,40 +55,50 @@ public class CommitParser {
                 // v1
                 jgit.safe_checkout(par.getId().name());
                 List<String> validPaths1 = new ArrayList<>();
+                typeSolver1.add(new JavaParserTypeSolver(repository.getDirectory().getAbsoluteFile()));
                 for (DiffEntry diffEntry : validEntries) {
                     String path = PathUtils.getOldPath(diffEntry, repository);
                     // 因为在is_valid_entry中限定diffEntry为MODIFY类型，所以path不为null
                     assert path != null;
                     validPaths1.add(path);
-                    typeSolver1.add(new JavaParserTypeSolver(new File(path)));
                 }
                 try {
-                    JavaSymbolSolver symbolSolver1 = new JavaSymbolSolver(typeSolver1);
-                    IPDGBuilder builder1 = new IPDGBuilder("v1", repository, validEntries, validPaths1, symbolSolver1);
-                    ipdg1 = builder1.build();
+                    if (!validPaths1.isEmpty()) {
+                        JavaSymbolSolver symbolSolver1 = new JavaSymbolSolver(typeSolver1);
+                        IPDGBuilder builder1 = new IPDGBuilder("v1", repository, validEntries, validPaths1, symbolSolver1);
+                        ipdg1 = builder1.build();
+                    } else {
+                        ipdg1 = null;
+                    }
                 } catch (Exception e) {
                     ipdg1 = null;
+//                    e.printStackTrace();
                 }
                 // v2
                 jgit.safe_checkout(commit.getId().name());
                 List<String> validPaths2 = new ArrayList<>();
+                typeSolver2.add(new JavaParserTypeSolver(repository.getDirectory().getAbsoluteFile()));
                 for (DiffEntry diffEntry : validEntries) {
                     String path = PathUtils.getNewPath(diffEntry, repository);
                     // 因为在is_valid_entry中限定diffEntry为MODIFY类型，所以path不为null
                     assert path != null;
                     validPaths2.add(path);
-                    typeSolver2.add(new JavaParserTypeSolver(new File(path)));
                 }
                 try {
-                    JavaSymbolSolver symbolSolver2 = new JavaSymbolSolver(typeSolver2);
-                    IPDGBuilder builder2 = new IPDGBuilder("v2", repository, validEntries, validPaths2, symbolSolver2);
-                    ipdg2 = builder2.build();
+                    if (!validPaths2.isEmpty()) {
+                        JavaSymbolSolver symbolSolver2 = new JavaSymbolSolver(typeSolver2);
+                        IPDGBuilder builder2 = new IPDGBuilder("v2", repository, validEntries, validPaths2, symbolSolver2);
+                        ipdg2 = builder2.build();
+                    } else {
+                        ipdg2 = null;
+                    }
                 } catch (Exception e) {
                     ipdg2 = null;
+//                    e.printStackTrace();
                 }
                 // add to result
                 if (ipdg1 != null && ipdg2 != null) {
-
+                    commitDiffs.add(new CommitDiff(commit, ipdg1, ipdg2));
                 }
             }
         }
@@ -134,6 +142,9 @@ public class CommitParser {
     }
 
     private static RevCommit getMainParent(Repository repository, RevCommit curr) {
+        if (curr.getParentCount() < 1) {
+            return null;
+        }
         ObjectId parId = curr.getParent(0).getId();
         try {
             RevCommit par = repository.parseCommit(parId);
@@ -143,12 +154,5 @@ public class CommitParser {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private EditList getEditList(DiffEntry diffEntry) throws IOException {
-        DiffFormatter diffFormatter = new DiffFormatter(null);
-        diffFormatter.setContext(0);
-        diffFormatter.setRepository(repository);
-        return diffFormatter.toFileHeader(diffEntry).toEditList();
     }
 }

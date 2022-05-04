@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import fy.annotation.KeyMethod;
+import fy.commit.PathUtils;
 import fy.commit.repr.AtomEdit;
 import fy.progex.graphs.IPDG;
 import fy.progex.parse.PDGInfo;
@@ -58,6 +59,7 @@ public class IPDGBuilder {
             pdgInfo.analyzePDGMaps();
             worklist.add(pdgInfo);
         }
+
         // key to entry nodes
         Map<String, CFNode> key2Entry = new HashMap<>();
         for (PDGInfo pdgInfo : worklist) {
@@ -118,17 +120,20 @@ public class IPDGBuilder {
             case "v1": {
                 for (DiffEntry diffEntry : diffEntries) {
                     PDGInfo pdgInfo = worklist.stream()
-                            .filter(pdgInfo1 -> pdgInfo1.rel_path.equals(diffEntry.getOldPath()))
+                            .filter(pdgInfo1 -> pdgInfo1.abs_path.equals(PathUtils.getOldPath(diffEntry, repository)))
                             .findFirst().orElse(null);
                     if (pdgInfo != null) {
+                        List<Integer> validLineNums = analyze_valid_line_nums(pdgInfo.cu);
                         EditList edits = getEditList(diffEntry);
                         List<AtomEdit> atomEdits = new ArrayList<>();
                         for (Edit edit : edits) {
-                            List<Integer> editLines = IntStream.range(edit.getBeginA(), edit.getEndA())
+                            List<Integer> editLines = IntStream.range(edit.getBeginA() + 1, edit.getEndA() + 1)
                                     .boxed()
                                     .collect(Collectors.toList());
-                            AtomEdit atomEdit = new AtomEdit(pdgInfo, editLines);
-                            atomEdits.add(atomEdit);
+                            if (has_intersection(editLines, validLineNums)) {
+                                AtomEdit atomEdit = new AtomEdit(pdgInfo, editLines);
+                                atomEdits.add(atomEdit);
+                            }
                         }
                         pdgInfo.setAtomEdits(atomEdits);
                     }
@@ -138,17 +143,20 @@ public class IPDGBuilder {
             case "v2": {
                 for (DiffEntry diffEntry : diffEntries) {
                     PDGInfo pdgInfo = worklist.stream()
-                            .filter(pdgInfo1 -> pdgInfo1.rel_path.equals(diffEntry.getNewPath()))
+                            .filter(pdgInfo1 -> pdgInfo1.abs_path.equals(PathUtils.getNewPath(diffEntry, repository)))
                             .findFirst().orElse(null);
                     if (pdgInfo != null) {
+                        List<Integer> validLineNums = analyze_valid_line_nums(pdgInfo.cu);
                         EditList edits = getEditList(diffEntry);
                         List<AtomEdit> atomEdits = new ArrayList<>();
                         for (Edit edit : edits) {
-                            List<Integer> editLines = IntStream.range(edit.getBeginB(), edit.getEndB())
+                            List<Integer> editLines = IntStream.range(edit.getBeginB() + 1, edit.getEndB() + 1)
                                     .boxed()
                                     .collect(Collectors.toList());
-                            AtomEdit atomEdit = new AtomEdit(pdgInfo, editLines);
-                            atomEdits.add(atomEdit);
+                            if (has_intersection(editLines, validLineNums)) {
+                                AtomEdit atomEdit = new AtomEdit(pdgInfo, editLines);
+                                atomEdits.add(atomEdit);
+                            }
                         }
                         pdgInfo.setAtomEdits(atomEdits);
                     }
@@ -164,6 +172,32 @@ public class IPDGBuilder {
         diffFormatter.setContext(0);
         diffFormatter.setRepository(repository);
         return diffFormatter.toFileHeader(diffEntry).toEditList();
+    }
+
+    /**
+     * 只有位于某个方法体内部的变动才是需要考虑的
+     */
+    private List<Integer> analyze_valid_line_nums(CompilationUnit cu) {
+        List<Integer> valid_line_nums = new ArrayList<>();
+        cu.findAll(MethodDeclaration.class).forEach(md -> {
+            if (md.getRange().isPresent()) {
+                int s = md.getRange().get().begin.line;
+                int t = md.getRange().get().end.line;
+                for (int i=s; i<t; i++) {
+                    valid_line_nums.add(i);
+                }
+            }
+        });
+        return valid_line_nums;
+    }
+
+    // TODO: 2022/5/5 add is_valid_edit()
+    private boolean has_intersection(List<Integer> list1, List<Integer> list2) {
+        List<Integer> result = list1.stream()
+                .distinct()
+                .filter(list2::contains)
+                .collect(Collectors.toList());
+        return !result.isEmpty();
     }
 
 }
