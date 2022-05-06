@@ -1,8 +1,6 @@
 package fy.commit;
 
-import fy.progex.graphs.IPDG;
 import fy.utils.jgit.JGitUtils;
-import javassist.compiler.ast.Pair;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -27,7 +25,7 @@ public class TestCustomCases {
 
     @Test
     void run () throws GitAPIException, IOException {
-        GitHistoryWalker walker = new GitHistoryWalker(project_path, output_path);
+        GitHistoryWalker walker = new GitHistoryWalker(project_path);
         walker.walk();
         List<RevCommit> commits = walker.allCommits;
 //        System.out.println(commits.size());
@@ -38,7 +36,7 @@ public class TestCustomCases {
 
     @Test
     void run_single() throws GitAPIException {
-        GitHistoryWalker walker = new GitHistoryWalker(project_path, output_path);
+        GitHistoryWalker walker = new GitHistoryWalker(project_path);
         walker.walk();
         List<RevCommit> commits = walker.allCommits;
         commits.removeIf(revCommit -> !revCommit.getId().name().equals("773a3667eb064b19f337a54364a917c432b4d8d8"));

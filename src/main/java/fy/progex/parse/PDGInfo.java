@@ -1,10 +1,9 @@
 package fy.progex.parse;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import fy.commit.repr.AtomEdit;
+import fy.commit.repr.FileDiff;
 import fy.utils.custom.CustomSeparator;
 import ghaffarian.graphs.DepthFirstTraversal;
 import ghaffarian.graphs.GraphTraversal;
@@ -15,21 +14,23 @@ import ghaffarian.progex.graphs.pdg.ControlDependenceGraph;
 import ghaffarian.progex.graphs.pdg.DataDependenceGraph;
 import ghaffarian.progex.graphs.pdg.PDNode;
 import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
+import org.eclipse.jgit.diff.DiffEntry;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 public class PDGInfo {
+    // identity
+    public DiffEntry diffEntry;
+    public String abs_path;
+    public String rel_path;
+    public FileDiff fileDiff;
+    public CompilationUnit cu;
+    public List<AtomEdit> atomEdits;
+    // graphs
     public ProgramDependeceGraph pdg;
     public ControlDependenceGraph cdg;
     public ControlFlowGraph cfg;
     public DataDependenceGraph ddg;
-    public JavaSymbolSolver symbolSolver;
-    public CompilationUnit cu;
-    public String abs_path;
-    public String rel_path;
-    public List<AtomEdit> atomEdits;
     public Map<String, PDNode> uid2ddNodes = new LinkedHashMap<>();
     public Map<String, PDNode> uid2cdNodes = new LinkedHashMap<>();
     public Map<String, CFNode> uid2cfNodes = new LinkedHashMap<>();
@@ -39,26 +40,17 @@ public class PDGInfo {
     public List<PDNode> cdgEntryNodes = new ArrayList<>();
     public Map<CFNode,CFNode> callingMap = new HashMap<>();
 
-    public PDGInfo(ProgramDependeceGraph pdg, JavaSymbolSolver symbolSolver) throws FileNotFoundException {
+    public PDGInfo(ProgramDependeceGraph pdg) {
         this.pdg = pdg;
-        this.symbolSolver = symbolSolver;
         this.cdg = pdg.CDS;
         this.cfg = pdg.DDS.getCFG();
         this.ddg = pdg.DDS;
         this.abs_path = pdg.FILE_NAME.getAbsolutePath();
         this.rel_path = pdg.FILE_NAME.getName();
-        init_parse_tree();
         init_global_info();
     }
 
-    private void init_parse_tree() throws FileNotFoundException {
-        if (symbolSolver != null) {
-            StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
-        }
-        cu = StaticJavaParser.parse(new File(pdg.FILE_NAME.getAbsolutePath()));
-    }
-
-    private void init_global_info() throws FileNotFoundException {
+    private void init_global_info() {
         ddg.copyVertexSet().forEach(node -> uid2ddNodes.put(node.getUid(), node));
         cdg.copyVertexSet().forEach(node -> uid2cdNodes.put(node.getUid(), node));
         cfg.copyVertexSet().forEach(node -> uid2cfNodes.put(node.getUid(), node));
@@ -73,6 +65,12 @@ public class PDGInfo {
         cfgParser.parse();
         DDGParser ddgParser = new DDGParser(this);
         ddgParser.parse(icfg);
+    }
+
+    public void parseFromFileDiff(FileDiff fileDiff) {
+        this.fileDiff = fileDiff;
+        this.diffEntry = fileDiff.diffEntry;
+        this.cu = fileDiff.cu;
     }
 
     public void analyzePDGMaps() {
@@ -167,5 +165,9 @@ public class PDGInfo {
 
     public void setAtomEdits(List<AtomEdit> atomEdits) {
         this.atomEdits = atomEdits;
+    }
+
+    public void setFileDiff(FileDiff fileDiff) {
+        this.fileDiff = fileDiff;
     }
 }

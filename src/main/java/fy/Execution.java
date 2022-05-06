@@ -69,7 +69,7 @@ public class Execution {
     private void run_single(String curr_project_path) throws GitAPIException, IOException {
         Repository repository = JGitUtils.buildJGitRepository(curr_project_path);
         JGitUtils jgit = new JGitUtils(curr_project_path);
-        GitHistoryWalker walker = new GitHistoryWalker(curr_project_path, output_path);
+        GitHistoryWalker walker = new GitHistoryWalker(curr_project_path);
         walker.walk();
         List<RevCommit> commits = walker.allCommits;
         System.out.println("total commits " + commits.size());
@@ -85,7 +85,7 @@ public class Execution {
         Repository repository = JGitUtils.buildJGitRepository(project);
         JGitUtils jgit = new JGitUtils(curr_project_path);
         RevCommit curr = JGitUtils.getRevCommitFromId(repository, version);
-        GitHistoryWalker walker = new GitHistoryWalker(curr_project_path, output_path);
+        GitHistoryWalker walker = new GitHistoryWalker(curr_project_path);
         walker.walk();
         List<RevCommit> commits = walker.allCommits;
         int index = commits.indexOf(curr);

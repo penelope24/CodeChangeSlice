@@ -14,15 +14,13 @@ import java.util.List;
 
 public class GitHistoryWalker {
     public String project_path;
-    public String output_path;
     public Repository repository;
     public JGitUtils jgit;
     // res
     public List<RevCommit> allCommits = new LinkedList<>();
 
-    public GitHistoryWalker(String project_path, String output_path) {
+    public GitHistoryWalker(String project_path) {
         this.project_path = project_path;
-        this.output_path = output_path;
         this.repository = JGitUtils.buildJGitRepository(project_path);
         this.jgit = new JGitUtils(project_path);
     }
@@ -40,7 +38,6 @@ public class GitHistoryWalker {
             try (RevWalk revWalk = new RevWalk(repository)) {
                 try {
                     revWalk.markStart(this.getHeadCommit());
-
                     for (RevCommit commit : revWalk) {
                         // record parsed commit
                         allCommits.add(commit);
@@ -57,10 +54,6 @@ public class GitHistoryWalker {
     private RevCommit getHeadCommit() throws IOException {
         Ref head = repository.findRef("HEAD");
         return repository.parseCommit(head.getObjectId());
-    }
-
-    public List<RevCommit> getAllCommits() {
-        return allCommits;
     }
 
 }

@@ -5,7 +5,6 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import fy.TestUtils;
-import fy.progex.graphs.IPDG;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

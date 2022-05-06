@@ -2,7 +2,6 @@ package fy.progex.graphs;
 
 import fy.progex.parse.PDGInfo;
 import fy.progex.utils.export.DotPalette;
-
 import ghaffarian.graphs.Edge;
 import ghaffarian.nanologger.Logger;
 import ghaffarian.progex.graphs.AbstractProgramGraph;

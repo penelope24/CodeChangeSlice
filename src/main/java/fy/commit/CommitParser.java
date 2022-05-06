@@ -1,16 +1,24 @@
 package fy.commit;
 
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import fy.commit.entry.Logger;
+import fy.commit.repr.AtomEdit;
 import fy.commit.repr.CommitDiff;
+import fy.commit.repr.FileDiff;
 import fy.progex.build.IPDGBuilder;
 import fy.progex.graphs.IPDG;
 import fy.utils.jgit.JGitUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.Edit;
+import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -18,9 +26,13 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CommitParser {
@@ -34,74 +46,96 @@ public class CommitParser {
     }
 
     public void parse (List<RevCommit> commits) throws GitAPIException, IOException {
+        jgit.reset();
         for (RevCommit commit : commits) {
             System.out.println(commit);
             RevCommit par = getMainParent(repository, commit);
             if (par == null) {
                 continue;
             }
-            jgit.reset();
             List<DiffEntry> diffEntries = listDiffEntries(commit, par, ".java");
-            if (diffEntries.size() < 20) {
-                List<DiffEntry> validEntries = diffEntries.stream()
-                        .filter(this::is_valid_entry)
-                        .collect(Collectors.toList());
-                IPDG ipdg1;
-                IPDG ipdg2;
-                CombinedTypeSolver typeSolver1 = new CombinedTypeSolver();
-                typeSolver1.add(new ReflectionTypeSolver());
-                CombinedTypeSolver typeSolver2 = new CombinedTypeSolver();
-                typeSolver2.add(new ReflectionTypeSolver());
-                // v1
+            // filter1
+            if (diffEntries.size() > 20 || diffEntries.size() < 1) {
+                continue;
+            }
+            // valid entries
+            List<DiffEntry> validEntries = diffEntries.stream()
+                    .filter(this::is_valid_entry)
+                    .collect(Collectors.toList());
+            // filter2
+            if (validEntries.isEmpty()) {
+                continue;
+            }
+            //res
+            Map<Edit, AtomEdit> atomEditMap = new LinkedHashMap<>();
+            // init graphs
+            IPDG graph1;
+            IPDG graph2;
+            // v1
+            {
+                List<FileDiff> fileDiffs = new ArrayList<>();
                 jgit.safe_checkout(par.getId().name());
-                List<String> validPaths1 = new ArrayList<>();
-                typeSolver1.add(new JavaParserTypeSolver(repository.getDirectory().getAbsoluteFile()));
                 for (DiffEntry diffEntry : validEntries) {
+                    // path
                     String path = PathUtils.getOldPath(diffEntry, repository);
-                    // 因为在is_valid_entry中限定diffEntry为MODIFY类型，所以path不为null
                     assert path != null;
-                    validPaths1.add(path);
+                    // symbol solver
+                    JavaSymbolSolver javaSymbolSolver = init_java_symbol_solver();
+                    CompilationUnit cu = init_parse_tree(path, javaSymbolSolver);
+                    // file diff
+                    FileDiff fileDiff = new FileDiff("v1", diffEntry, path, cu);
+                    fileDiffs.add(fileDiff);
                 }
                 try {
-                    if (!validPaths1.isEmpty()) {
-                        JavaSymbolSolver symbolSolver1 = new JavaSymbolSolver(typeSolver1);
-                        IPDGBuilder builder1 = new IPDGBuilder("v1", repository, validEntries, validPaths1, symbolSolver1);
-                        ipdg1 = builder1.build();
-                    } else {
-                        ipdg1 = null;
-                    }
+                    IPDGBuilder builder = new IPDGBuilder("v1", repository, fileDiffs, atomEditMap);
+                    graph1 = builder.build();
                 } catch (Exception e) {
-                    ipdg1 = null;
-//                    e.printStackTrace();
-                }
-                // v2
-                jgit.safe_checkout(commit.getId().name());
-                List<String> validPaths2 = new ArrayList<>();
-                typeSolver2.add(new JavaParserTypeSolver(repository.getDirectory().getAbsoluteFile()));
-                for (DiffEntry diffEntry : validEntries) {
-                    String path = PathUtils.getNewPath(diffEntry, repository);
-                    // 因为在is_valid_entry中限定diffEntry为MODIFY类型，所以path不为null
-                    assert path != null;
-                    validPaths2.add(path);
-                }
-                try {
-                    if (!validPaths2.isEmpty()) {
-                        JavaSymbolSolver symbolSolver2 = new JavaSymbolSolver(typeSolver2);
-                        IPDGBuilder builder2 = new IPDGBuilder("v2", repository, validEntries, validPaths2, symbolSolver2);
-                        ipdg2 = builder2.build();
-                    } else {
-                        ipdg2 = null;
-                    }
-                } catch (Exception e) {
-                    ipdg2 = null;
-//                    e.printStackTrace();
-                }
-                // add to result
-                if (ipdg1 != null && ipdg2 != null) {
-                    commitDiffs.add(new CommitDiff(commit, ipdg1, ipdg2));
+                    graph1 = null;
+                    Logger.writeLog("/Users/fy/Documents/fyJavaProjects/ProgramGraphs/src/test/resources/running_log.txt", e.toString());
                 }
             }
+            // v2
+            {
+                List<FileDiff> fileDiffs = new ArrayList<>();
+                jgit.safe_checkout(commit.getId().name());
+                for (DiffEntry diffEntry : validEntries) {
+                    // path
+                    String path = PathUtils.getNewPath(diffEntry, repository);
+                    assert path != null;
+                    // symbol solver
+                    JavaSymbolSolver javaSymbolSolver = init_java_symbol_solver();
+                    CompilationUnit cu = init_parse_tree(path, javaSymbolSolver);
+                    // file diff
+                    FileDiff fileDiff = new FileDiff("v2", diffEntry, path, cu);
+                    fileDiffs.add(fileDiff);
+                }
+                try {
+                    IPDGBuilder builder = new IPDGBuilder("v2", repository, fileDiffs, atomEditMap);
+                    graph2 = builder.build();
+                } catch (Exception e) {
+                    graph2 = null;
+                    Logger.writeLog("/Users/fy/Documents/fyJavaProjects/ProgramGraphs/src/test/resources/running_log.txt", e.toString());
+                }
+            }
+            if (graph1 != null || graph2 != null) {
+                CommitDiff commitDiff = new CommitDiff(commit, graph1, graph2, atomEditMap);
+                commitDiffs.add(commitDiff);
+            }
+//            CommitDiff commitDiff = new CommitDiff(commit, graph1, graph2, atomEditMap);
+//            commitDiffs.add(commitDiff);
         }
+    }
+
+    private JavaSymbolSolver init_java_symbol_solver() {
+        CombinedTypeSolver typeSolver = new CombinedTypeSolver();
+        typeSolver.add(new ReflectionTypeSolver());
+        typeSolver.add(new JavaParserTypeSolver(repository.getDirectory().getAbsoluteFile()));
+        return new JavaSymbolSolver(typeSolver);
+    }
+
+    private CompilationUnit init_parse_tree(String path, JavaSymbolSolver javaSymbolSolver) throws FileNotFoundException {
+        StaticJavaParser.getConfiguration().setSymbolResolver(javaSymbolSolver);
+        return StaticJavaParser.parse(new File(path));
     }
 
     /**
@@ -155,4 +189,5 @@ public class CommitParser {
             return null;
         }
     }
+
 }
