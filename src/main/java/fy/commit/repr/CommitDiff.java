@@ -21,6 +21,10 @@ public class CommitDiff {
         this.atomEditMap = atomEditMap;
     }
 
+    public CommitDiff(RevCommit commit) {
+        this.commit = commit;
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;

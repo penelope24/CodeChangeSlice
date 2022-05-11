@@ -2,101 +2,121 @@ package fy.progex.build;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import fy.commit.repr.AtomEdit;
-import fy.commit.repr.FileDiff;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+
+import fy.commit.entry.Logger;
 import fy.progex.graphs.IPDG;
 import fy.progex.parse.PDGInfo;
+import fy.progex.parse.type.collect.TypeCollector;
+import fy.progex.parse.type.solver.MySimpleTypeSolver;
+import ghaffarian.graphs.DepthFirstTraversal;
 import ghaffarian.graphs.Edge;
+import ghaffarian.graphs.GraphTraversal;
 import ghaffarian.progex.graphs.cfg.CFEdge;
 import ghaffarian.progex.graphs.cfg.CFNode;
 import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
-import ghaffarian.progex.graphs.pdg.PDGBuilder;
-import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.Edit;
-import org.eclipse.jgit.diff.EditList;
-import org.eclipse.jgit.lib.Repository;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class IPDGBuilder {
-    String version;
-    Repository repository;
-    List<FileDiff> fileDiffs;
-    Map<Edit, AtomEdit> atomEditMap;
 
-    public IPDGBuilder(String version, Repository repository, List<FileDiff> fileDiffs, Map<Edit, AtomEdit> atomEditMap) {
-        this.version = version;
-        this.repository = repository;
-        this.fileDiffs = fileDiffs;
-        this.atomEditMap = atomEditMap;
-    }
-
-    public IPDG build() throws IOException {
+    public static IPDG build(List<PDGInfo> worklist) throws IOException {
         ControlFlowGraph icfg = new ControlFlowGraph("ICFG.java");
-        List<String> javaFiles = fileDiffs.stream()
-                .map(diff -> diff.javaFile)
-                .collect(Collectors.toList());
-        ProgramDependeceGraph[] pdgs;
-        try {
-            pdgs = PDGBuilder.buildForAll("Java", javaFiles.toArray(new String[0]));
-        } catch (Exception e) {
-            return null;
-        }
-        // get analyze list
-        List<PDGInfo> worklist = new ArrayList<>();
-        for (int i=0; i<pdgs.length; i++) {
-            PDGInfo pdgInfo = new PDGInfo(pdgs[i]);
-            FileDiff fileDiff = fileDiffs.stream()
-                    .filter(diff -> diff.javaFile.equals(pdgInfo.abs_path))
-                    .findFirst().orElse(null);
-            assert fileDiff != null;
-            pdgInfo.parseFromFileDiff(fileDiff);
-            pdgInfo.analyzePDGMaps();
-            worklist.add(pdgInfo);
-        }
-        // key to entry nodes
-        Map<String, CFNode> key2Entry = new HashMap<>();
+        // parse each pdg
+        worklist.forEach(PDGInfo::parse);
+        // add each cfg to icfg
+        worklist.forEach(pdgInfo -> icfg.addGraph(pdgInfo.cfg));
+//        // parse call relations
+//        Map<CFNode, CFNode> callSet = new LinkedHashMap<>();
+//        TypeCollector collector = new TypeCollector(worklist);
+//        collector.collect();
+//        for (PDGInfo pdgInfo : worklist) {
+//            MySimpleTypeSolver simpleTypeSolver = new MySimpleTypeSolver(collector, pdgInfo.abs_path);
+//            for (MethodCallExpr mce : simpleTypeSolver.getLocalCalls()) {
+//                MethodDeclaration md = simpleTypeSolver.solveMethodCall(mce);
+//                if (md != null) {
+//                    CFNode caller = pdgInfo.cfg.copyVertexSet().stream()
+//                            .filter(node -> node.getLineOfCode() == mce.getRange().get().begin.line)
+//                            .findFirst().orElse(null);
+//                }
+//            }
+//        }
+        // call relations
+        Map<CFNode, CFNode> callRelations = new LinkedHashMap<>();
+        // analyze entry methods
+        Map<String, CFNode> keyEntryMap = new LinkedHashMap<>();
         for (PDGInfo pdgInfo : worklist) {
-            CompilationUnit cu = pdgInfo.cu;
-            List<CFNode> entries = pdgInfo.analyzeEntryNodes();
+            CompilationUnit cu = pdgInfo.snapShot.cu;
+            CFNode[] entries = pdgInfo.cfg.getAllMethodEntries();
             for (CFNode entryNode : entries) {
+                entryNode.setProperty("entry", true);
+                // analyze exit nodes
+                ArrayList<CFNode> exitpoints = new ArrayList<>();
+                GraphTraversal<CFNode, CFEdge> iter = new DepthFirstTraversal<>(pdgInfo.cfg, entryNode);
+                while (iter.hasNext()) {
+                    CFNode node = iter.nextVertex();
+                    if (pdgInfo.cfg.getOutDegree(node) == 0) {
+                        node.setProperty("exit", true);
+                        exitpoints.add(node);
+                    }
+                }
+                entryNode.setProperty("exits", exitpoints);
                 // analyze qualified name
                 MethodDeclaration md = cu.findAll(MethodDeclaration.class).stream()
                         .filter(m -> m.getRange().get().begin.line == entryNode.getLineOfCode())
                         .findFirst().orElse(null);
                 if (md != null) {
                     String qualifiedSignature = md.resolve().getQualifiedSignature();
-                    key2Entry.put(qualifiedSignature, entryNode);
+                    keyEntryMap.put(qualifiedSignature, entryNode);
                 }
                 icfg.addMethodEntry(entryNode);
             }
         }
-        // parse call relations
-        Map<CFNode, CFNode> callMap = new HashMap<>();
+        // analyze call sites
         for (PDGInfo pdgInfo : worklist) {
-            Map<CFNode, List<String>> call2keys = pdgInfo.analyzeCallSites();
-            for (CFNode caller : call2keys.keySet()) {
-                List<String> keys = call2keys.get(caller);
+            // list all method calls
+            List<MethodCallExpr> methodCalls = pdgInfo.snapShot.cu.findAll(MethodCallExpr.class);
+            // analyze full signature & rearrange to each calling nodes
+            Map<CFNode, List<String>> callSiteKeysMap = new HashMap<>();
+            for (MethodCallExpr mce : methodCalls) {
+                // 1. 如果全名key解析失败，2.如果全名key不包含于entry method中
+                String key;
+                try {
+                    key = mce.resolve().getQualifiedSignature();
+                    if (!keyEntryMap.containsKey(key)) {
+                        key = null;
+                    }
+                }
+                catch (Exception e) {
+                    key = null;
+                }
+                if (key != null) {
+                    CFNode caller = pdgInfo.cfg.copyVertexSet().stream()
+                            .filter(node -> node.getLineOfCode() == mce.getRange().get().begin.line)
+                            .findFirst().orElse(null);
+                    if (caller != null) {
+                        caller.setProperty("callsite", true);
+                        caller.setProperty("callingkey", key);
+                        callSiteKeysMap.computeIfAbsent(caller, k -> new LinkedList<>()).add(key);
+                    }
+                }
+            }
+            // for each calling node, add call relation
+            for (CFNode caller : callSiteKeysMap.keySet()) {
+                List<String> keys = callSiteKeysMap.get(caller);
                 for(String key : keys) {
-                    CFNode callee = key2Entry.get(key);
+                    CFNode callee = keyEntryMap.get(key);
                     if (callee != null) {
-                        callMap.put(caller, callee);
-                        pdgInfo.addCallingRelation(caller, callee);
+                        callRelations.put(caller, callee);
                     }
                 }
             }
         }
-        // add each cfg to icfg, each ddg to iddg
-        worklist.forEach(parser -> icfg.addGraph(parser.cfg));
+        System.out.println("all calls: " + callRelations.size());
+        Logger.writeLog("/Users/fy/Documents/fyJavaProjects/ProgramGraphs/src/test/resources/running_log.txt", "s");
         // add call relationships
-        callMap.forEach((src, tgt) -> {
+        callRelations.forEach((src, tgt) -> {
             if (!icfg.containsEdge(src, tgt)) {
                 icfg.addEdge(new Edge<>(src, new CFEdge(CFEdge.Type.CALLS), tgt));
                 for (CFNode exitNode : (ArrayList<CFNode>) tgt.getProperty("exits")) {
@@ -104,34 +124,7 @@ public class IPDGBuilder {
                 }
             }
         });
-        // parse each pdg
-        worklist.forEach(interPDGParsedInfo -> {
-            interPDGParsedInfo.parse(icfg);
-        });
-        // analyze edits
-        for (PDGInfo pdgInfo : worklist) {
-            DiffEntry diffEntry = pdgInfo.diffEntry;
-            EditList edits = getEditList(diffEntry);
-            for (Edit edit : edits) {
-                switch (version) {
-                    case "v1":
-                        atomEditMap.computeIfAbsent(edit, AtomEdit::new).setPdgInfo1(pdgInfo);
-                        break;
-                    case "v2":
-                        atomEditMap.computeIfAbsent(edit, AtomEdit::new).setPdgInfo2(pdgInfo);
-                        break;
-                }
-            }
-        }
         return new IPDG(icfg, worklist);
     }
-
-    private EditList getEditList(DiffEntry diffEntry) throws IOException {
-        DiffFormatter diffFormatter = new DiffFormatter(null);
-        diffFormatter.setContext(0);
-        diffFormatter.setRepository(repository);
-        return diffFormatter.toFileHeader(diffEntry).toEditList();
-    }
-
 
 }

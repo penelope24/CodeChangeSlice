@@ -1,9 +1,7 @@
 package fy.progex.parse;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import fy.commit.repr.AtomEdit;
-import fy.commit.repr.FileDiff;
+import fy.commit.repr.SnapShot;
 import fy.utils.custom.CustomSeparator;
 import ghaffarian.graphs.DepthFirstTraversal;
 import ghaffarian.graphs.GraphTraversal;
@@ -15,17 +13,15 @@ import ghaffarian.progex.graphs.pdg.DataDependenceGraph;
 import ghaffarian.progex.graphs.pdg.PDNode;
 import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.Edit;
 
 import java.util.*;
 
 public class PDGInfo {
-    // identity
-    public DiffEntry diffEntry;
     public String abs_path;
     public String rel_path;
-    public FileDiff fileDiff;
-    public CompilationUnit cu;
-    public List<AtomEdit> atomEdits;
+    public SnapShot snapShot;
+    public List<Edit> edits;
     // graphs
     public ProgramDependeceGraph pdg;
     public ControlDependenceGraph cdg;
@@ -58,61 +54,19 @@ public class PDGInfo {
                 put(node.getUid() + CustomSeparator.getCustomSepSymbol() + abs_path, node));
     }
 
-    public void parse(ControlFlowGraph icfg) {
+    public void parse() {
         CDGParser cdgParser = new CDGParser(this);
         cdgParser.parse();
         CFGParser cfgParser = new CFGParser(this);
         cfgParser.parse();
         DDGParser ddgParser = new DDGParser(this);
-        ddgParser.parse(icfg);
-    }
-
-    public void parseFromFileDiff(FileDiff fileDiff) {
-        this.fileDiff = fileDiff;
-        this.diffEntry = fileDiff.diffEntry;
-        this.cu = fileDiff.cu;
+        ddgParser.parse();
     }
 
     public void analyzePDGMaps() {
         ddg.copyVertexSet().forEach(node -> node.setProperty("pdg", pdg));
         cdg.copyVertexSet().forEach(node -> node.setProperty("pdg", pdg));
         cfg.copyVertexSet().forEach(node -> node.setProperty("pdg", pdg));
-    }
-
-    public List<CFNode> analyzeEntryNodes() {
-        List<CFNode> cfgEntries = Arrays.asList(cfg.getAllMethodEntries());
-        for (CFNode entryNode : cfgEntries) {
-            entryNode.setProperty("entry", true);
-            // analyze exit nodes
-            ArrayList<CFNode> exitpoints = new ArrayList<>();
-            GraphTraversal<CFNode, CFEdge> iter = new DepthFirstTraversal<>(cfg, entryNode);
-            while (iter.hasNext()) {
-                CFNode node = iter.nextVertex();
-                if (cfg.getOutDegree(node) == 0) {
-                    node.setProperty("exit", true);
-                    exitpoints.add(node);
-                }
-            }
-            entryNode.setProperty("exits", exitpoints);
-        }
-        return cfgEntries;
-    }
-
-    public Map<CFNode, List<String>> analyzeCallSites() {
-        Map<CFNode, List<String>> call2keys = new HashMap<>();
-        List<MethodCallExpr> methodCalls = cu.findAll(MethodCallExpr.class);
-        for (MethodCallExpr mce : methodCalls) {
-            String key = mce.resolve().getQualifiedSignature();
-            CFNode caller = cfg.copyVertexSet().stream()
-                    .filter(node -> node.getLineOfCode() == mce.getRange().get().begin.line)
-                    .findFirst().orElse(null);
-            if (key != null && caller != null) {
-                caller.setProperty("callsite", true);
-                caller.setProperty("callingkey", key);
-                call2keys.computeIfAbsent(caller, k -> new ArrayList<>()).add(key);
-            }
-        }
-        return call2keys;
     }
 
     public PDNode findDataNode(PDNode cdNode) {
@@ -151,10 +105,6 @@ public class PDGInfo {
         this.cdgEntryNodes = cdgEntryNodes;
     }
 
-    public void setCu(CompilationUnit cu) {
-        this.cu = cu;
-    }
-
     public void setCallingMap(Map<CFNode, CFNode> callingMap) {
         this.callingMap = callingMap;
     }
@@ -163,11 +113,11 @@ public class PDGInfo {
         this.callingMap.put(caller, callee);
     }
 
-    public void setAtomEdits(List<AtomEdit> atomEdits) {
-        this.atomEdits = atomEdits;
+    public void setFileSnapShot(SnapShot snapShot) {
+        this.snapShot = snapShot;
     }
 
-    public void setFileDiff(FileDiff fileDiff) {
-        this.fileDiff = fileDiff;
+    public void setEdits(List<Edit> edits) {
+        this.edits = edits;
     }
 }

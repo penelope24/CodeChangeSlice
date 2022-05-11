@@ -49,7 +49,8 @@ public class IPDG extends AbstractProgramGraph<CFNode, CFEdge> {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(base).append("/");
-        sb.append("IPDG.dot");
+        sb.append("IPDG").append(UUID.randomUUID());
+        sb.append(".dot");
         String dotFilePath = sb.toString();
 //        System.out.println("exporting to : " + dotFilePath);
         try (PrintWriter dot = new PrintWriter(dotFilePath, "UTF-8")) {

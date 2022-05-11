@@ -10,8 +10,7 @@ public class Logger {
     public static void writeLog(String outPath, String content) throws IOException {
         final File file = new File(outPath);
         try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
-            writer.printf("error: %s", content);
-            writer.println("\n");
+            writer.println(content);
         }
     }
 }

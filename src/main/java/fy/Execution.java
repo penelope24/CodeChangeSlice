@@ -1,6 +1,5 @@
 package fy;
 
-import fy.commit.CommitParser;
 import fy.commit.GitHistoryWalker;
 import fy.commit.repr.CommitDiff;
 import fy.slicing.entry.CommitEntry;
@@ -67,49 +66,15 @@ public class Execution {
     }
 
     private void run_single(String curr_project_path) throws GitAPIException, IOException {
-        Repository repository = JGitUtils.buildJGitRepository(curr_project_path);
-        JGitUtils jgit = new JGitUtils(curr_project_path);
-        GitHistoryWalker walker = new GitHistoryWalker(curr_project_path);
-        walker.walk();
-        List<RevCommit> commits = walker.allCommits;
-        System.out.println("total commits " + commits.size());
-        CommitParser parser = new CommitParser(repository, jgit);
-        parser.parse(commits);
-        List<CommitDiff> commitDiffs = parser.commitDiffs;
-        for (CommitDiff commitDiff : commitDiffs) {
-            CommitEntry.track(commitDiff, output_path);
-        }
+
     }
 
     private void run_continue(String project, String version) throws IOException, GitAPIException {
-        Repository repository = JGitUtils.buildJGitRepository(project);
-        JGitUtils jgit = new JGitUtils(curr_project_path);
-        RevCommit curr = JGitUtils.getRevCommitFromId(repository, version);
-        GitHistoryWalker walker = new GitHistoryWalker(curr_project_path);
-        walker.walk();
-        List<RevCommit> commits = walker.allCommits;
-        int index = commits.indexOf(curr);
-        List<RevCommit> worklist = commits.subList(index, commits.size());
-        CommitParser parser = new CommitParser(repository, jgit);
-        parser.parse(worklist);
-        List<CommitDiff> commitDiffs = parser.commitDiffs;
-        for (CommitDiff commitDiff : commitDiffs) {
-            CommitEntry.track(commitDiff, output_path);
-        }
+
     }
 
     private void run_reproduce(String project, String version) throws IOException, GitAPIException {
-        Repository repository = JGitUtils.buildJGitRepository(project);
-        JGitUtils jgit = new JGitUtils(curr_project_path);
-        RevCommit curr = JGitUtils.getRevCommitFromId(repository, version);
-        List<RevCommit> commits = new ArrayList<>();
-        commits.add(curr);
-        CommitParser parser = new CommitParser(repository, jgit);
-        parser.parse(commits);
-        List<CommitDiff> commitDiffs = parser.commitDiffs;
-        for (CommitDiff commitDiff : commitDiffs) {
-            CommitEntry.track(commitDiff, output_path);
-        }
+
     }
 
     public void setRunType(RunType runType) {

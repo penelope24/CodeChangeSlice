@@ -33,8 +33,8 @@ public class DDGParser {
      *  3. instance of
      *  4. inter-procedure
      */
-    public void parse(ControlFlowGraph icfg) {
-        CompilationUnit cu = pdgInfo.cu;
+    public void parse() {
+        CompilationUnit cu = pdgInfo.snapShot.cu;
         if (cu == null) {
             return;
         }
@@ -117,17 +117,6 @@ public class DDGParser {
                         .forEach(node1 -> add_edge(node1, node, var));
             }
         });
-        // inter-procedure
-//        icfg.copyEdgeSet().stream()
-//                .filter(edge -> edge.label.type == CFEdge.Type.RETURN)
-//                .forEach(edge -> {
-//                    add_edge(edge.source.getPDNode(), edge.target.getPDNode(), "ret");
-//                });
-//        icfg.copyEdgeSet().stream()
-//                .filter(edge -> edge.label.type == CFEdge.Type.CALLS)
-//                .forEach(edge -> {
-//                    add_edge(edge.source.getPDNode(), edge.target.getPDNode(), "call");
-//                });
     }
 
     private boolean has_edge(Set<Edge<PDNode, DDEdge>> edgeSet, Edge<PDNode, DDEdge> edge) {

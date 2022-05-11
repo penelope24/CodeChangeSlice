@@ -1,29 +1,34 @@
 package fy.progex.utils.data;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithType;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class MethodKey {
-    String qualifiedName;
-    int line;
+    String name;
+    List<String> paramTypeList;
+    int paramNum;
 
-    public MethodKey(String qualifiedName, int line) {
-        this.qualifiedName = qualifiedName;
-        this.line = line;
+    public MethodKey(String name, List<String> paramTypeList, int paramNum) {
+        this.name = name;
+        this.paramTypeList = paramTypeList;
+        this.paramNum = paramNum;
     }
 
-    public String getQualifiedName() {
-        return qualifiedName;
+    public MethodKey(MethodDeclaration md) {
+        this.name = md.getNameAsString();
+        this.paramNum = md.getParameters().size();
+        this.paramTypeList = md.getParameters().stream()
+                .map(NodeWithType::getTypeAsString)
+                .collect(Collectors.toList());
     }
 
-    public int getLine() {
-        return line;
+    public MethodKey(String name, int paramNum) {
+        this.name = name;
+        this.paramNum = paramNum;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof MethodKey)) {
-            return false;
-        }
-        MethodKey key = (MethodKey) obj;
-        return this.qualifiedName.equals(key.qualifiedName)
-                && this.line == key.line;
-    }
+
 }

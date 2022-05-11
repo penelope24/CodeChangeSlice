@@ -5,6 +5,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import fy.TestUtils;
+import fy.commit.GitHistoryWalker;
+import fy.commit.entry.CommitEntry;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -16,12 +19,8 @@ class IPDGBuilderTest {
     String output = "/Users/fy/Documents/data/slicing_cases/output";
 
     @Test
-    void test() throws IOException {
-        List<String> paths = TestUtils.getPaths(base);
-        CombinedTypeSolver typeSolver = new CombinedTypeSolver();
-        typeSolver.add(new ReflectionTypeSolver());
-        typeSolver.add(new JavaParserTypeSolver(new File(base)));
-        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(typeSolver);
-
+    void test() throws IOException, GitAPIException {
+        GitHistoryWalker walker = new GitHistoryWalker(base);
+        walker.walk_and_parse(output);
     }
 }
