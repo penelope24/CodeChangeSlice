@@ -1,0 +1,161 @@
+package fy.CDS.data;
+
+import com.google.common.collect.Sets;
+import fy.CDS.result.CDGTrackResult;
+import fy.CDS.result.DDGTrackResult;
+import fy.PROGEX.parse.PDGInfo;
+import ghaffarian.graphs.Edge;
+import ghaffarian.progex.NodeType;
+import ghaffarian.progex.graphs.cfg.CFEdge;
+import ghaffarian.progex.graphs.cfg.CFNode;
+import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
+import ghaffarian.progex.graphs.pdg.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class SliceManager {
+    // input
+    public PDGInfo pdgInfo;
+    public CFNode entryNode;
+    public List<PDNode> startNodes;
+    public DDGTrackResult<PDNode, DDEdge> ddgTrackResult;
+    public CDGTrackResult<PDNode> cdgTrackResult;
+    // graph
+    public ProgramDependeceGraph graph;
+    public DataDependenceGraph ddg;
+    public ControlDependenceGraph cdg;
+    public ControlFlowGraph cfg;
+    public String fileName;
+    // parse
+    public List<Integer> chLines;
+    public Set<CFNode> startCFNodes;
+    public Set<CFNode> exitNodes = new HashSet<>();
+    public Set<CFNode> dataBindNodes = new HashSet<>();
+    public Set<CFNode> controlBindNodes = new HashSet<>();
+    public Set<CFNode> callsites = new HashSet<>();
+    public Set<CFNode> skeletonNodes;
+    public Set<PDNode> skeletonPDNodes;
+    public Set<CFNode> worklist;
+    public Set<CFNode> worklist_for_test;
+    // result
+    public Set<PDNode> resDataFlowNodes = new HashSet<>();
+    public Set<Edge<PDNode, DDEdge>> resDataFlowEdges = new HashSet<>();
+    public Set<CFNode> resControlFlowNodes = new HashSet<>();
+    public Set<Edge<CFNode, CFEdge>> resControlFlowEdges = new HashSet<>();
+    // check
+    public boolean is_valid_track = true;
+
+
+    public SliceManager(PDGInfo pdgInfo, CFNode entryNode, List<PDNode> startNodes) {
+        this.pdgInfo = pdgInfo;
+        this.entryNode = entryNode;
+        this.startNodes = startNodes;
+        init();
+    }
+
+    private void init() {
+        // graph
+        this.graph = pdgInfo.pdg;
+        this.ddg = this.graph.DDS;
+        this.cdg = this.graph.CDS;
+        this.cfg = this.graph.DDS.getCFG();
+        this.fileName = graph.FILE_NAME.getName().replaceAll(".java", "");
+        this.startCFNodes = startNodes.stream()
+                .map(pdgInfo::findCFNodeByDDNode)
+                .collect(Collectors.toSet());
+        this.chLines = startNodes.stream()
+                .map(node -> node.getLineOfCode())
+                .collect(Collectors.toList());
+        if (startCFNodes.isEmpty()) {
+            is_valid_track = false;
+        }
+    }
+
+    public void updateAfterDDGTrack(DDGTrackResult<PDNode, DDEdge> result) {
+        this.ddgTrackResult = result;
+        this.dataBindNodes = result.getResDataNodes().stream()
+                .map(pdgInfo::findCFNodeByDDNode)
+                .collect(Collectors.toSet());
+        this.resDataFlowNodes.addAll(result.getResDataNodes());
+        this.resDataFlowEdges.addAll(result.getResDataFlowEdges());
+        this.resControlFlowNodes.addAll(
+                result.getResDataNodes().stream()
+                    .map(pdgInfo::findCFNodeByDDNode)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet())
+        );
+    }
+
+    public void updateAfterCDGTrack(CDGTrackResult<PDNode> result) {
+        this.cdgTrackResult = result;
+        this.controlBindNodes = result.getControlBindingNodes().stream()
+                .map(pdgInfo::findCFNodeByCDNode)
+                .collect(Collectors.toSet());
+        this.resControlFlowNodes.addAll(
+                result.getControlBindingNodes().stream()
+                        .map(pdgInfo::findCFNodeByCDNode)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet())
+        );
+    }
+
+    public void updateBeforeCFGTrack() {
+        this.skeletonNodes = Sets.union(this.dataBindNodes, this.controlBindNodes);
+        this.skeletonPDNodes = this.skeletonNodes.stream()
+                .map(pdgInfo::findCDNode)
+                .collect(Collectors.toSet());
+        this.worklist = skeletonNodes.stream()
+                .filter(CFNode::isBranch)
+                .collect(Collectors.toSet());
+        this.worklist_for_test = pdgInfo.cfg.copyVertexSet().stream()
+                .filter(CFNode::isBranch)
+                .collect(Collectors.toSet());
+        assert Stream.of(resDataFlowNodes, resDataFlowEdges, resControlFlowNodes, resControlFlowEdges)
+                .noneMatch(t -> t.contains(null));
+    }
+
+    public void updateAfterCFGTrack() {
+        this.exitNodes = cfg.copyVertexSet().stream()
+                .filter(node -> node.isTerminal() || node.getLineOfCode() == -1)
+                .collect(Collectors.toSet());
+    }
+
+
+    public boolean is_ready_for_slice () {
+        return Stream.of(graph, startNodes, entryNode,
+                dataBindNodes, controlBindNodes, skeletonNodes, worklist).allMatch(Objects::nonNull);
+    }
+
+    public boolean is_ready_for_palette() {
+        boolean complete = is_ready_for_slice() && !exitNodes.isEmpty();
+        boolean not_contain_null = Stream.of(resDataFlowNodes, resDataFlowEdges, resControlFlowNodes, resControlFlowEdges)
+                .noneMatch(t -> t.contains(null));
+        return complete && not_contain_null;
+    }
+
+    public void setPalette() {
+        this.startCFNodes.forEach(node -> node.setProperty("start", true));
+        this.entryNode.setProperty("entry", true);
+        this.dataBindNodes.forEach(node -> node.setProperty("data_bind", true));
+        this.controlBindNodes.forEach(node -> node.setProperty("control_bind", true));
+        this.callsites.forEach(node -> node.setProperty("callsite", true));
+        this.exitNodes.forEach(node -> node.setProperty("exit", true));
+    }
+
+    public Slice getSliceResult() {
+        if (! this.is_ready_for_palette()) {
+            throw new IllegalStateException("not ready for export");
+        }
+        return new Slice(this);
+    }
+
+    public Slice getTestResult() {
+        return new Slice(this);
+    }
+
+}
