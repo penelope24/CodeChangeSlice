@@ -35,12 +35,12 @@ public class CommitDiffProcessor {
         this.dotExporter = new DotExporter(outputDir, commitDiff);
     }
 
-    public void process () throws Exception {
+    public void process () throws IOException {
         System.out.println("file diffs size : " + commitDiff.fileDiffs.size());
         for (FileDiff fileDiff : commitDiff.fileDiffs) {
             FileDiffProcessor processor = new FileDiffProcessor(fileDiff);
             processor.process();
-            export_original_text(processor);
+//            export_original_text(processor);
 //            export_original_graph(processor);
             export_slices(processor);
             export_slice_cfg_paths(processor);
@@ -128,7 +128,7 @@ public class CommitDiffProcessor {
                 .findFirst().orElse(null);
     }
 
-    private void export_original_text(FileDiffProcessor processor) throws Exception {
+    private void export_original_text(FileDiffProcessor processor) throws IOException {
         String base = this.dotExporter.getOriginal_graph_base();
         FileDiff fileDiff = processor.fileDiff;
         // v1
@@ -207,11 +207,11 @@ public class CommitDiffProcessor {
                 String sliceName = base + "/" + slice.sliceManager.fileName + "_slice_v1" + "@edit_" + index1;
                 CFGPathSlicer pathSlicer = new CFGPathSlicer(slice);
                 pathSlicer.slice();
-                List<Slice> cfgPaths = pathSlicer.cfgPaths;
+                Set<Slice> cfgPaths = pathSlicer.cfgPaths;
+                int index2 = 0;
                 for (Slice path : cfgPaths) {
                     path.setPaletteResult(slice.paletteResult);
-                    int index2 = cfgPaths.indexOf(path);
-                    String pathName = sliceName + "_path" + index2 + ".dot";
+                    String pathName = sliceName + "_path" + index2++ + ".dot";
                     DotExporter.exportDot(path, pathName);
                 }
             });
@@ -225,12 +225,12 @@ public class CommitDiffProcessor {
                 String sliceName = base + "/" + slice.sliceManager.fileName + "_slice_v2" + "@edit_" + index1;
                 CFGPathSlicer pathSlicer = new CFGPathSlicer(slice);
                 pathSlicer.slice();
-                List<Slice> cfgPaths = pathSlicer.cfgPaths;
+                Set<Slice> cfgPaths = pathSlicer.cfgPaths;
                 System.out.println("paths num: " + cfgPaths.size());
+                int index2 = 0;
                 for (Slice path : cfgPaths) {
                     path.setPaletteResult(slice.paletteResult);
-                    int index2 = cfgPaths.indexOf(path);
-                    String pathName = sliceName + "_path" + index2 + ".dot";
+                    String pathName = sliceName + "_path" + index2++ + ".dot";
                     DotExporter.exportDot(path, pathName);
                 }
             });

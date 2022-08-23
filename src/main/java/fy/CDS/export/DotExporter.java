@@ -121,44 +121,11 @@ public class DotExporter {
                 dot.println("  " + src + " -> " + trg + edgeDotStr +
                         "label=\"" + controlFlowEdge.label.type + "\"];");
             }
-            for (Edge<PDNode, DDEdge> dataEdge : slice.dataFlowEdges) {
-                String src = dataFowNodeIdMap.get(dataEdge.source);
-                String trg = dataFowNodeIdMap.get(dataEdge.target);
-                String edgeDotStr = DotPalette.getEdgeDotStr(dataEdge);
-                dot.println("  " + src + " -> " + trg + edgeDotStr + "label=\" (" + dataEdge.label.var + ")\"];");
-            }
-            // sub asts
-//            for (AbstractSyntaxTree ast : slice.subAstTrees) {
-//                // sub ast nodes
-//                for (ASNode node : ast.copyVertexSet()) {
-//                    String name = "v" + nodeCount++;
-//                    asNodeStringMap.put(node, name);
-//                    StringBuilder label = new StringBuilder("  [label=\"");
-//                    String coloredDotStr = DotPalette.getColoredNodeStr(node);
-//                    label.append(StringUtils.escape(node.getCode())).append("\"").append(coloredDotStr).append("];");
-//                    dot.println("  " + name + label.toString());
-//                }
-//                // sub ast edges
-//                for (Edge<ASNode, ASEdge> astEdge : ast.copyEdgeSet()) {
-//                    String src = asNodeStringMap.get(astEdge.source);
-//                    String tgt = asNodeStringMap.get(astEdge.target);
-//                    String edgeDotStr = DotPalette.getEdgeDotStr(astEdge);
-//                    dot.println("  " + src + " -> " + tgt + edgeDotStr + "];");
-//                }
-//                // root to par cf node
-//                ASNode root = ast.root;
-//                if (root.getProperty("par_line") == null) continue;
-//                int start = (int) root.getProperty("par_line");
-//                CFNode startNode = slice.copyVertexSet().stream()
-//                        .filter(node -> node.getLineOfCode() == start)
-//                        .findFirst().orElse(null);
-//                if (startNode != null) {
-//                    String src = controlFlowNodeIdMap.get(startNode);
-//                    String tgt = asNodeStringMap.get(root);
-//                    Edge<ASNode, ASEdge> dummy = new Edge<>(null, new ASEdge(), null);
-//                    String edgeDotStr = DotPalette.getEdgeDotStr(dummy);
-//                    dot.println("  " + src + " -> " + tgt + edgeDotStr + "];");
-//                }
+//            for (Edge<PDNode, DDEdge> dataEdge : slice.dataFlowEdges) {
+//                String src = dataFowNodeIdMap.get(dataEdge.source);
+//                String trg = dataFowNodeIdMap.get(dataEdge.target);
+//                String edgeDotStr = DotPalette.getEdgeDotStr(dataEdge);
+//                dot.println("  " + src + " -> " + trg + edgeDotStr + "label=\" (" + dataEdge.label.var + ")\"];");
 //            }
             dot.println("  // end-of-graph\n}");
         } catch (UnsupportedEncodingException | FileNotFoundException ex) {

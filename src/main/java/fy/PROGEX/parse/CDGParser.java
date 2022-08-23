@@ -35,7 +35,7 @@ public class CDGParser{
                 .collect(Collectors.toSet());
         for (PDNode root : roots) {
             PDNode cascade_start_node = null;
-            List<PDNode> cascadeNodes = new ArrayList<>();
+            List<PDNode> cascadeContainingNodes = new ArrayList<>();
             // bfs
             Deque<Edge<PDNode, CDEdge>> visiting = new ArrayDeque<>();
             Edge<PDNode, CDEdge> dummy = new Edge<>(null, null, root);
@@ -45,23 +45,21 @@ public class CDGParser{
                 PDNode node = edge.target;
                 String code = node.getCode();
                 if (code.startsWith("FOLLOW-")) {
-                    List<PDNode> casNodes = childNodeSolver.find_first_level_children(node);
-                    for (PDNode casNode : casNodes) {
-                        casNode.setProperty("cascade", true);
-                        cascadeNodes.add(casNode);
-                    }
+                    List<PDNode> casChildren = childNodeSolver.find_first_level_children(node);
+                    cascadeContainingNodes.addAll(casChildren);
+                    PDNode cascadeNode = parentSolver.find_first_par_loose(node);
+                    cascadeNode.setProperty("cascade", true);
                 }
                 if (code.equals("FOLLOW-1")) {
                     cascade_start_node = parentSolver.find_first_par_loose(node);
                     cascade_start_node.setProperty("cascade_start", true);
-
                 }
                 visiting.addAll(cdg.copyOutgoingEdges(node));
             }
             if (cascade_start_node != null) {
                 PDNode cascade_containing_node = parentSolver.find_first_par(cascade_start_node);
                 cascade_containing_node.setProperty("cascade_contain", true);
-                cascade_containing_node.setProperty("cascade_children", cascadeNodes);
+                cascade_containing_node.setProperty("cascade_children", cascadeContainingNodes);
             }
         }
 

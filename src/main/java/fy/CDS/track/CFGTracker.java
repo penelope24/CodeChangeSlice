@@ -61,6 +61,8 @@ public class CFGTracker {
         rootNodeEditor.edit();
     }
 
+
+
     public SliceManager getTrackManager() {
         return sliceManager;
     }

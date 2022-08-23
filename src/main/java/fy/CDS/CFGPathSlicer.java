@@ -19,7 +19,7 @@ public class CFGPathSlicer {
     List<Stack<CFNode>> connectionPaths = new ArrayList<>();
     ArrayDeque<Edge<CFNode, CFEdge>> visited = new ArrayDeque<>();
     // result
-    List<Slice> cfgPaths = new LinkedList<>();
+    Set<Slice> cfgPaths = new LinkedHashSet<>();
 
     public CFGPathSlicer(Slice slice) {
         this.slice = slice;
