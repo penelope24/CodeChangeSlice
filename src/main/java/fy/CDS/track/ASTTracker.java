@@ -1,15 +1,11 @@
 package fy.CDS.track;
 
-import fy.CDS.result.ASTTrackResult;
-import fy.PROGEX.parse.PDGInfo;
 import ghaffarian.graphs.Edge;
 import ghaffarian.progex.graphs.ast.ASEdge;
 import ghaffarian.progex.graphs.ast.ASNode;
 import ghaffarian.progex.graphs.ast.AbstractSyntaxTree;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 
 public class ASTTracker {
 

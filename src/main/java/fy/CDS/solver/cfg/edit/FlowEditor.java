@@ -1,9 +1,9 @@
 package fy.CDS.solver.cfg.edit;
 
 import fy.CDS.data.SliceManager;
-import fy.PROGEX.parse.PDGInfo;
 import fy.CDS.solver.cdg.ChildNodeSolver;
 import fy.CDS.solver.cfg.ControlFlowSolver;
+import fy.PROGEX.parse.PDGInfo;
 import ghaffarian.graphs.Edge;
 import ghaffarian.progex.NodeType;
 import ghaffarian.progex.graphs.cfg.CFEdge;
@@ -128,6 +128,9 @@ public class FlowEditor extends ControlFlowSolver {
         if (node.getType() == NodeType.CONTINUE) {
             return true;
         }
+//        if (node.getType() == NodeType.TRY) {
+//            return true;
+//        }
         return skeletonPDNodes.contains(node);
     }
 
@@ -141,6 +144,9 @@ public class FlowEditor extends ControlFlowSolver {
         if (node.getType() == NodeType.CONTINUE) {
             return true;
         }
+//        if (node.getType() == NodeType.TRY) {
+//            return true;
+//        }
         return skeletonNodes.contains(node);
     }
 

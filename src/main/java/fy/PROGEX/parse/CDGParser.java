@@ -172,6 +172,7 @@ public class CDGParser{
             case IF:
             case SWITCH:
             case CASE:
+            case TRY:
                 node.setBranch(true);
                 node.setTerminal(false);
                 break;

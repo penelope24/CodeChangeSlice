@@ -1,5 +1,6 @@
 package fy.CDS.export;
 
+import fy.CDS.result.PaletteResult;
 import ghaffarian.graphs.Edge;
 import ghaffarian.progex.graphs.ast.ASEdge;
 import ghaffarian.progex.graphs.ast.ASNode;
@@ -7,7 +8,29 @@ import ghaffarian.progex.graphs.cfg.CFEdge;
 import ghaffarian.progex.graphs.cfg.CFNode;
 import ghaffarian.progex.graphs.pdg.DDEdge;
 
+import java.util.Set;
+
 public class DotPalette {
+    PaletteResult paletteResult;
+    public Set<CFNode> startNodes;
+    public CFNode entryNode;
+    public Set<CFNode> dataBindNodes;
+    public Set<CFNode> controlBindNodes;
+    public Set<CFNode> callSites;
+    public Set<CFNode> exitNodes;
+    public Set<CFNode> classNodes;
+
+
+    public DotPalette(PaletteResult paletteResult) {
+        this.paletteResult = paletteResult;
+        this.startNodes = paletteResult.startNodes;
+        this.entryNode = paletteResult.entryNode;
+        this.dataBindNodes = paletteResult.dataBindNodes;
+        this.controlBindNodes = paletteResult.controlBindNodes;
+        this.callSites = paletteResult.callSites;
+        this.exitNodes = paletteResult.exitNodes;
+    }
+
     public enum NodeColorType {
         Entry           ("gray"),
         CallSite        ("crimson"),
@@ -39,8 +62,8 @@ public class DotPalette {
 
     public enum EdgeStyle {
         DataFlow        ("solid"),
-        ControlFLow     ("bold"),
-        Call            ("bashed"),
+        ControlFLow     ("bashed"),
+        Call            ("bold"),
         AST             ("default"),
         CONTAIN         ("default"),
         Default         ("default");
@@ -63,32 +86,49 @@ public class DotPalette {
         }
     }
 
-    public static NodeColorType getNodeColorType(CFNode node) {
-        if ((boolean) node.getPropertyWithDefault("entry")) {
+    public NodeColorType getNodeColorType(CFNode node) {
+        if (node == this.entryNode)
             return NodeColorType.Entry;
-        }
-        if ((boolean) node.getPropertyWithDefault("start")) {
+        if (startNodes.contains(node))
             return NodeColorType.SlicingStart;
-        }
-        if ((boolean) node.getPropertyWithDefault("exit")) {
+        if (exitNodes.contains(node))
             return NodeColorType.Exit;
-        }
-        if ((boolean) node.getPropertyWithDefault("data_bind")) {
+        if (dataBindNodes.contains(node))
             return NodeColorType.DataBind;
-        }
-        if ((boolean) node.getPropertyWithDefault("control_bind")) {
+        if (controlBindNodes.contains(node))
             return NodeColorType.ControlBind;
-        }
-        if ((boolean) node.getPropertyWithDefault("class")) {
-            return NodeColorType.CLASS;
-        }
-        if ((boolean) node.getPropertyWithDefault("callsite")) {
+        if (callSites.contains(node))
+            return NodeColorType.CallSite;
+        if (classNodes == null)
             return NodeColorType.Default;
-        }
+        if (classNodes.contains(node))
+            return NodeColorType.CLASS;
         return NodeColorType.Default;
+//        if ((boolean) node.getPaletteWithDefault("entry")) {
+//            return NodeColorType.Entry;
+//        }
+//        if ((boolean) node.getPaletteWithDefault("start")) {
+//            return NodeColorType.SlicingStart;
+//        }
+//        if ((boolean) node.getPaletteWithDefault("exit")) {
+//            return NodeColorType.Exit;
+//        }
+//        if ((boolean) node.getPaletteWithDefault("data_bind")) {
+//            return NodeColorType.DataBind;
+//        }
+//        if ((boolean) node.getPaletteWithDefault("control_bind")) {
+//            return NodeColorType.ControlBind;
+//        }
+//        if ((boolean) node.getPaletteWithDefault("class")) {
+//            return NodeColorType.CLASS;
+//        }
+//        if ((boolean) node.getPaletteWithDefault("callsite")) {
+//            return NodeColorType.Default;
+//        }
+//        return NodeColorType.Default;
     }
 
-    public static String getColoredNodeStr(CFNode node) {
+    public String getColoredNodeStr(CFNode node) {
         NodeColorType type = getNodeColorType(node);
         if (type == NodeColorType.Default) {
             return "";
@@ -119,7 +159,7 @@ public class DotPalette {
                 case CONTAIN:
                     return EdgeColor.CONTAIN;
                 default:
-                    return EdgeColor.Default;
+                    return EdgeColor.ControlFLow;
             }
         }
         if (edge.label instanceof DDEdge) {
@@ -141,7 +181,7 @@ public class DotPalette {
                 case CONTAIN:
                     return EdgeStyle.CONTAIN;
                 default:
-                    return EdgeStyle.Default;
+                    return EdgeStyle.ControlFLow;
             }
         }
         if (edge.label instanceof DDEdge) {
@@ -163,7 +203,7 @@ public class DotPalette {
                 case CONTAIN:
                     return EdgeArrow.CONTAIN;
                 default:
-                    return EdgeArrow.Default;
+                    return EdgeArrow.ControlFLow;
             }
         }
         if (edge.label instanceof DDEdge) {

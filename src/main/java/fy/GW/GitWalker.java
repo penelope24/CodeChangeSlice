@@ -3,6 +3,7 @@ package fy.GW;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import fy.ACE.JavaSymbolSolverBuilder;
 import fy.ACE.MyPatchSolver;
 import fy.GW.data.CommitDiff;
 import fy.GW.data.FileDiff;
@@ -23,9 +24,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class GitWalker {
     String projectPath;
@@ -39,7 +41,7 @@ public class GitWalker {
     int build_fail = 0;
     // hyper params
     int DIFF_ENTRY_SIZE_LIMIT = 20;
-    int JAVA_FILE_SIZE_LIMIT = 300;
+    int JAVA_FILE_SIZE_LIMIT = 10000;
 
     public GitWalker(String projectPath) throws GitAPIException, IOException {
         this.projectPath = projectPath;
@@ -120,7 +122,7 @@ public class GitWalker {
                 .collect(Collectors.toList());
         fileDiffs.forEach(fileDiff -> {
             try {
-                List<Edit> edits = JGitUtils.getEditList(repository, fileDiff.getDiffEntry());
+                List<Edit> edits = JGitUtils.getEditList(repository, fileDiff.diffEntry);
                 fileDiff.setEdits(edits);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -134,7 +136,7 @@ public class GitWalker {
             e.printStackTrace();
         }
         fileDiffs.forEach(fileDiff -> {
-            String path = PathUtils.getOldPath(fileDiff.getDiffEntry(), repository);
+            String path = PathUtils.getOldPath(fileDiff.diffEntry, repository);
             if (path == null) return;
             int totalLineNUm = JavaFileUtils.countSourceLineNum(path);
             if (totalLineNUm > this.JAVA_FILE_SIZE_LIMIT) return;
@@ -159,11 +161,12 @@ public class GitWalker {
                 fileDiff.setCu1(cu);
             }
         });
+//        JavaSymbolSolver symbolSolver1 = JavaSymbolSolverBuilder.build(projectPath);
 //        List<File> diffJavaFiles1 = fileDiffs.stream()
-//                .filter(fileDiff -> fileDiff.getGraph1() != null)
-//                .map(fileDiff -> fileDiff.getGraph1().FILE_NAME)
+//                .filter(fileDiff -> fileDiff.graph1 != null)
+//                .map(fileDiff -> fileDiff.graph1.FILE_NAME)
 //                .collect(Collectors.toList());
-//        MyPatchSolver patchSolver1 = new MyPatchSolver(projectPath, null, diffJavaFiles1);
+//        MyPatchSolver patchSolver1 = new MyPatchSolver(projectPath, symbolSolver1, diffJavaFiles1);
 //        commitDiff.setSolver1(patchSolver1);
         // v2
         try {
@@ -172,7 +175,7 @@ public class GitWalker {
             e.printStackTrace();
         }
         fileDiffs.forEach(fileDiff -> {
-            String path = PathUtils.getNewPath(fileDiff.getDiffEntry(), repository);
+            String path = PathUtils.getNewPath(fileDiff.diffEntry, repository);
             if (path == null) return;
             int totalLineNUm = JavaFileUtils.countSourceLineNum(path);
             if (totalLineNUm > this.JAVA_FILE_SIZE_LIMIT) return;
@@ -197,6 +200,13 @@ public class GitWalker {
                 fileDiff.setCu2(cu);
             }
         });
+//        JavaSymbolSolver symbolSolver2 = JavaSymbolSolverBuilder.build(projectPath);
+//        List<File> diffJavaFiles2 = fileDiffs.stream()
+//                .filter(fileDiff -> fileDiff.graph2 != null)
+//                .map(fileDiff -> fileDiff.graph2.FILE_NAME)
+//                .collect(Collectors.toList());
+//        MyPatchSolver patchSolver2 = new MyPatchSolver(projectPath, symbolSolver2, diffJavaFiles2);
+//        commitDiff.setSolver2(patchSolver2);
         // check
         fileDiffs.removeIf(fileDiff -> !fileDiff.isValid());
         // return

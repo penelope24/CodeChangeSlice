@@ -35,6 +35,7 @@ public class RootNodeEditor extends FlowEditor{
         exitNode.setCode("exit");
         exitNode.setLineOfCode(-1);
         exitNode.setProperty("exit", true);
+        exitNode.setTerminal(true);
     }
 
     public void parse() {
@@ -45,6 +46,12 @@ public class RootNodeEditor extends FlowEditor{
     }
 
     public void edit() {
-        analyzeBranch(root, validChildren, CFEdge.Type.EPSILON, exitNode);
+        // 对于root node来说，即是没有孩子节点也要保证在exit终止
+        if (validChildren.size() == 0) {
+            addEdge(root, exitNode, CFEdge.Type.EPSILON);
+        }
+        else {
+            analyzeBranch(root, validChildren, CFEdge.Type.EPSILON, exitNode);
+        }
     }
 }

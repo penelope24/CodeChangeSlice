@@ -1,7 +1,5 @@
 package fy.ACE;
 
-import com.github.javaparser.ast.body.MethodDeclaration;
-
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -17,6 +15,11 @@ public class MethodKey {
     int paramNum;
     List<String> simpleParamTypes;
 
+    public MethodKey(File javaFile, int line) {
+        this.javaFile = javaFile;
+        this.line = line;
+    }
+
     public MethodKey(String pkgName, String clsName, String methodName, int paramNum, List<String> simpleParamTypes) {
         this.pkgName = pkgName;
         this.clsName = clsName;
@@ -31,6 +34,26 @@ public class MethodKey {
 
     public void setLine(int line) {
         this.line = line;
+    }
+
+    public void setPkgName(String pkgName) {
+        this.pkgName = pkgName;
+    }
+
+    public void setClsName(String clsName) {
+        this.clsName = clsName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public void setParamNum(int paramNum) {
+        this.paramNum = paramNum;
+    }
+
+    public void setSimpleParamTypes(List<String> simpleParamTypes) {
+        this.simpleParamTypes = simpleParamTypes;
     }
 
     @Override

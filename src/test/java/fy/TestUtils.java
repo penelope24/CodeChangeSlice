@@ -1,6 +1,6 @@
 package fy;
 
-import fy.utils.file.DirTraveler;
+import fy.utils.file.SubFileFinder;
 import ghaffarian.progex.graphs.cfg.CFGBuilder;
 import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
 import ghaffarian.progex.graphs.cfg.ICFGBuilder;
@@ -13,7 +13,7 @@ import java.util.List;
 public class TestUtils {
 
     public static List<String> getPaths(String base) {
-        return DirTraveler.findAllJavaFiles(base);
+        return SubFileFinder.findAllJavaFiles(base);
     }
 
     public static ProgramDependeceGraph generatePDG (String path) throws IOException {

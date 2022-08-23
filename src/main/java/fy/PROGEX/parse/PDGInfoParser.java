@@ -1,7 +1,5 @@
 package fy.PROGEX.parse;
 
-import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
-
 public class PDGInfoParser {
 
     public static void parse(PDGInfo pdgInfo) {

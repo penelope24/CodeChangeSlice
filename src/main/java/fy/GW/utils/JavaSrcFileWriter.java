@@ -6,7 +6,6 @@ package fy.GW.utils;
 import com.github.javaparser.ast.CompilationUnit;
 
 import java.io.*;
-import java.util.*;
 
 public class JavaSrcFileWriter {
 

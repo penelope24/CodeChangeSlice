@@ -27,7 +27,7 @@ public class Utils {
         return res;
     }
 
-    public static MethodKey parseQualifiedSignature(String signature) {
+    public static void parseQualifiedSignature(MethodKey key, String signature) {
         String methodMainBody = signature.replaceAll("\\((.*)\\)", "");
         List<String> ss = Arrays.asList(methodMainBody.split("\\."));
         String methodName = ss.get(ss.size() - 1);
@@ -53,7 +53,10 @@ public class Utils {
             }
 
         }
-        MethodKey methodKey = new MethodKey(pkgName, clsName, methodName, paramNum, simpleParamTypes);
-        return methodKey;
+        key.setPkgName(pkgName);
+        key.setClsName(clsName);
+        key.setMethodName(methodName);
+        key.setParamNum(paramNum);
+        key.setSimpleParamTypes(simpleParamTypes);
     }
 }

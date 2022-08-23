@@ -7,7 +7,8 @@ import ghaffarian.progex.graphs.pdg.DataDependenceGraph;
 import ghaffarian.progex.graphs.pdg.PDNode;
 import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class PDGInfo {
     public ProgramDependeceGraph pdg;

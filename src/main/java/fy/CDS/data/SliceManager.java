@@ -3,13 +3,14 @@ package fy.CDS.data;
 import com.google.common.collect.Sets;
 import fy.CDS.result.CDGTrackResult;
 import fy.CDS.result.DDGTrackResult;
+import fy.CDS.result.PaletteResult;
 import fy.PROGEX.parse.PDGInfo;
 import ghaffarian.graphs.Edge;
-import ghaffarian.progex.NodeType;
 import ghaffarian.progex.graphs.cfg.CFEdge;
 import ghaffarian.progex.graphs.cfg.CFNode;
 import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
 import ghaffarian.progex.graphs.pdg.*;
+import org.eclipse.jgit.diff.Edit;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,7 @@ public class SliceManager {
     public PDGInfo pdgInfo;
     public CFNode entryNode;
     public List<PDNode> startNodes;
+    public Edit.Type editType;
     public DDGTrackResult<PDNode, DDEdge> ddgTrackResult;
     public CDGTrackResult<PDNode> cdgTrackResult;
     // graph
@@ -51,10 +53,11 @@ public class SliceManager {
     public boolean is_valid_track = true;
 
 
-    public SliceManager(PDGInfo pdgInfo, CFNode entryNode, List<PDNode> startNodes) {
+    public SliceManager(PDGInfo pdgInfo, CFNode entryNode, List<PDNode> startNodes, Edit.Type editType) {
         this.pdgInfo = pdgInfo;
         this.entryNode = entryNode;
         this.startNodes = startNodes;
+        this.editType = editType;
         init();
     }
 
@@ -69,7 +72,7 @@ public class SliceManager {
                 .map(pdgInfo::findCFNodeByDDNode)
                 .collect(Collectors.toSet());
         this.chLines = startNodes.stream()
-                .map(node -> node.getLineOfCode())
+                .map(PDNode::getLineOfCode)
                 .collect(Collectors.toList());
         if (startCFNodes.isEmpty()) {
             is_valid_track = false;
@@ -120,7 +123,7 @@ public class SliceManager {
     }
 
     public void updateAfterCFGTrack() {
-        this.exitNodes = cfg.copyVertexSet().stream()
+        this.exitNodes = resControlFlowNodes.stream()
                 .filter(node -> node.isTerminal() || node.getLineOfCode() == -1)
                 .collect(Collectors.toSet());
     }
@@ -135,27 +138,20 @@ public class SliceManager {
         boolean complete = is_ready_for_slice() && !exitNodes.isEmpty();
         boolean not_contain_null = Stream.of(resDataFlowNodes, resDataFlowEdges, resControlFlowNodes, resControlFlowEdges)
                 .noneMatch(t -> t.contains(null));
-        return complete && not_contain_null;
+        boolean res_not_null = Stream.of(resControlFlowNodes, resControlFlowEdges, resDataFlowNodes)
+                .noneMatch(Set::isEmpty);
+        return complete && not_contain_null && res_not_null;
     }
 
-    public void setPalette() {
-        this.startCFNodes.forEach(node -> node.setProperty("start", true));
-        this.entryNode.setProperty("entry", true);
-        this.dataBindNodes.forEach(node -> node.setProperty("data_bind", true));
-        this.controlBindNodes.forEach(node -> node.setProperty("control_bind", true));
-        this.callsites.forEach(node -> node.setProperty("callsite", true));
-        this.exitNodes.forEach(node -> node.setProperty("exit", true));
+    public PaletteResult setPalette() {
+//        this.startCFNodes.forEach(node -> node.setPalette("start", true));
+//        this.entryNode.setPalette("entry", true);
+//        this.dataBindNodes.forEach(node -> node.setPalette("data_bind", true));
+//        this.controlBindNodes.forEach(node -> node.setPalette("control_bind", true));
+//        this.callsites.forEach(node -> node.setPalette("callsite", true));
+//        this.exitNodes.forEach(node -> node.setPalette("exit", true));
+        PaletteResult result = new PaletteResult(this.startCFNodes, this.entryNode, this.dataBindNodes,
+                this.controlBindNodes, this.callsites, this.exitNodes);
+        return result;
     }
-
-    public Slice getSliceResult() {
-        if (! this.is_ready_for_palette()) {
-            throw new IllegalStateException("not ready for export");
-        }
-        return new Slice(this);
-    }
-
-    public Slice getTestResult() {
-        return new Slice(this);
-    }
-
 }

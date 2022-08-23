@@ -1,8 +1,8 @@
 package fy.CDS.solver.cfg.edit;
 
 import fy.CDS.data.SliceManager;
-import fy.PROGEX.parse.PDGInfo;
 import fy.CDS.solver.cdg.ChildNodeSolver;
+import fy.PROGEX.parse.PDGInfo;
 import ghaffarian.graphs.Edge;
 import ghaffarian.progex.NodeType;
 import ghaffarian.progex.graphs.cfg.CFEdge;
