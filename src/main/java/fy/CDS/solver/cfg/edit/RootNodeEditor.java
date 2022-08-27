@@ -39,7 +39,7 @@ public class RootNodeEditor extends FlowEditor{
     }
 
     public void parse() {
-        List<PDNode> validPDChildren = findValidChildren(rootPDNode);
+        List<PDNode> validPDChildren = findValidChildrenForBrNode(rootPDNode);
         validChildren = validPDChildren.stream()
                 .map(node -> pdgInfo.findCFNodeByCDNode(node))
                 .collect(Collectors.toList());

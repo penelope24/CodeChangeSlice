@@ -139,11 +139,11 @@ public class IfNodeFlowEditor extends FlowEditor {
                 endNode = first_endif;
                 break;
         }
-        List<PDNode> validPDChildrenTrue = findValidChildren(ifPDNode, CDEdge.Type.TRUE);
+        List<PDNode> validPDChildrenTrue = findValidChildrenForBrNode(ifPDNode, CDEdge.Type.TRUE);
         validChildrenTrue = validPDChildrenTrue.stream()
                 .map(pdgInfo::findCFNodeByCDNode)
                 .collect(Collectors.toList());
-        List<PDNode> validPDChildrenFalse = findValidChildren(ifPDNode, CDEdge.Type.FALSE);
+        List<PDNode> validPDChildrenFalse = findValidChildrenForBrNode(ifPDNode, CDEdge.Type.FALSE);
         validChildrenFalse = validPDChildrenFalse.stream()
                 .map(pdgInfo::findCFNodeByCDNode)
                 .collect(Collectors.toList());

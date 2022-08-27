@@ -46,7 +46,7 @@ public class WhileNodeFlowEditor extends FlowEditor {
         assert brFalse != null;
         endNode = brFalse.target;
         assert endNode != null;
-        List<PDNode> validPDChildren = findValidChildren(whilePDNode);
+        List<PDNode> validPDChildren = findValidChildrenForBrNode(whilePDNode);
         validChildren = validPDChildren.stream()
                 .map(pdgInfo::findCFNodeByCDNode)
                 .collect(Collectors.toList());

@@ -36,7 +36,7 @@ public class TryNodeFlowEditor extends FlowEditor{
         tryBranch = graph.copyOutgoingEdges(tryNode).stream()
                 .findFirst().orElse(null);
         assert tryBranch != null;
-        List<PDNode> validPDChildren = findValidChildren(tryPDNode);
+        List<PDNode> validPDChildren = findValidChildrenForBrNode(tryPDNode);
         validChildren = validPDChildren.stream()
                 .map(pdgInfo::findCFNodeByCDNode)
                 .collect(Collectors.toList());

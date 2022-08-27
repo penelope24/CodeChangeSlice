@@ -43,7 +43,7 @@ public class ForNodeFlowEditor extends FlowEditor {
         assert brFalse != null;
         endNode = brFalse.target;
         assert endNode != null;
-        List<PDNode> validPDChildren = findValidChildren(forPDNode);
+        List<PDNode> validPDChildren = findValidChildrenForBrNode(forPDNode);
         validChildren = validPDChildren.stream()
                 .map(pdgInfo::findCFNodeByCDNode)
                 .collect(Collectors.toList());

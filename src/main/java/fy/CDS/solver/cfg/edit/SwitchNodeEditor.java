@@ -94,7 +94,7 @@ public class SwitchNodeEditor extends FlowEditor{
                     :
                     defaultNode;
             PDNode casePDNode = pdgInfo.findCDNode(caseNode);
-            List<PDNode> casePDChildren = findValidChildren(casePDNode, CDEdge.Type.TRUE);
+            List<PDNode> casePDChildren = findValidChildrenForBrNode(casePDNode, CDEdge.Type.TRUE);
             List<CFNode> validCaseChildren = casePDChildren.stream()
                     .map(pdgInfo::findCFNodeByCDNode)
                     .collect(Collectors.toList());
