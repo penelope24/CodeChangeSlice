@@ -1,5 +1,6 @@
 package fy.CDS.solver.cfg.edit;
 
+import fy.CDS.data.Slice;
 import fy.CDS.data.SliceManager;
 import fy.CDS.solver.cdg.ChildNodeSolver;
 import fy.CDS.solver.cfg.ControlFlowSolver;
@@ -19,7 +20,8 @@ public class FlowEditor extends ControlFlowSolver {
     Set<PDNode> skeletonPDNodes;
     SliceManager sliceManager;
     boolean test = false;
-
+    // tmp flow edit result for test use.
+    Slice tmpFlowEditResult = new Slice();
 
     public FlowEditor(PDGInfo pdgInfo, Set<CFNode> skeletonNodes, SliceManager sliceManager) {
         super(pdgInfo);
@@ -248,9 +250,19 @@ public class FlowEditor extends ControlFlowSolver {
         if (!contains_edge(sliceManager.resControlFlowEdges, newEdge)) {
             sliceManager.resControlFlowEdges.add(newEdge);
         }
+        // also add to tmp flow edit result
+        tmpFlowEditResult.addVertex(src);
+        tmpFlowEditResult.addVertex(tgt);
+        if (!tmpFlowEditResult.containsEdge(newEdge)) {
+            tmpFlowEditResult.addEdge(newEdge);
+        }
     }
 
     public void setTest(boolean test) {
         this.test = test;
+    }
+
+    public Slice getTmpFlowEditResult() {
+        return tmpFlowEditResult;
     }
 }
