@@ -84,11 +84,11 @@ public class FlowEditor extends ControlFlowSolver {
         return validPDChildren;
     }
 
-    public List<PDNode> findValidChildrenForBrNode(PDNode startNode, CDEdge.Type filter) {
+    public List<PDNode> findValidChildrenForBrNode(PDNode beNode, CDEdge.Type filter) {
         ChildNodeSolver childNodeSolver = new ChildNodeSolver(pdgInfo.cdg);
-        List<PDNode> first_level_children = childNodeSolver.find_first_level_children(startNode, filter);
-        if (startNode.getProperty("cascade_contain") != null) {
-            List<PDNode> cascadeNodes = (List<PDNode>) startNode.getProperty("cascade_children");
+        List<PDNode> first_level_children = childNodeSolver.find_first_level_children(beNode, filter);
+        if (beNode.getProperty("cascade_contain") != null) {
+            List<PDNode> cascadeNodes = (List<PDNode>) beNode.getProperty("cascade_children");
             for (PDNode casNode : cascadeNodes) {
                 if (!first_level_children.contains(casNode)) {
                     first_level_children.add(casNode);
@@ -106,7 +106,7 @@ public class FlowEditor extends ControlFlowSolver {
             }
             else if (node.isBranch()) {
                 List<PDNode> validLevel = null;
-                List<List<PDNode>> levels = childNodeSolver.find_all_children_level_order(startNode);
+                List<List<PDNode>> levels = childNodeSolver.find_all_children_level_order(node);
                 for (List<PDNode> level : levels) {
                     if (level.stream().anyMatch(this::is_valid)) {
                         validLevel = level;
