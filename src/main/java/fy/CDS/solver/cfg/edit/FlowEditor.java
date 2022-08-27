@@ -66,7 +66,7 @@ public class FlowEditor extends ControlFlowSolver {
             else if (node.isBranch()) {
                 List<PDNode> validLevel = null;
                 // todo a bug brnode should be node
-                List<List<PDNode>> levels = childNodeSolver.find_all_children_level_order(brNode);
+                List<List<PDNode>> levels = childNodeSolver.find_all_children_level_order(node);
                 for (List<PDNode> level : levels) {
                     if (level.stream().anyMatch(this::is_valid)) {
                         validLevel = level;
