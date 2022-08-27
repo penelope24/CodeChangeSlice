@@ -29,4 +29,11 @@ public class SliceCaseTest {
 //        graph.DDS.exportDOT(output);
 //        graph.CDS.exportDOT(output);
     }
+
+    @Test
+    void nested_if_cdg() {
+        String f = "/Users/fy/Documents/MyProjects/CodeChangeCases/slicing_cases/main/java/nested_cases/NestedIFCDGCase.java";
+        ProgramDependeceGraph graph = MyPDGBuilder.build(new File(f));
+        System.out.println(graph);
+    }
 }
