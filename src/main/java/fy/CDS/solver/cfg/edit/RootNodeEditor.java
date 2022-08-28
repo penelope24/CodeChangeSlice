@@ -38,6 +38,22 @@ public class RootNodeEditor extends FlowEditor{
         exitNode.setTerminal(true);
     }
 
+    public RootNodeEditor(PDGInfo pdgInfo, CFNode root) {
+        super(pdgInfo);
+        this.root = root;
+        this.cfg = pdgInfo.cfg;
+        this.cdg = pdgInfo.cdg;
+        this.rootPDNode = pdgInfo.findCDNode(root);
+        this.skeletonPDNodes = skeletonNodes.stream()
+                .map(pdgInfo::findCDNode)
+                .collect(Collectors.toSet());
+        this.exitNode = new CFNode();
+        exitNode.setCode("exit");
+        exitNode.setLineOfCode(-1);
+        exitNode.setProperty("exit", true);
+        exitNode.setTerminal(true);
+    }
+
     public void parse() {
         List<PDNode> validPDChildren = findValidChildrenForBrNode(rootPDNode);
         validChildren = validPDChildren.stream()

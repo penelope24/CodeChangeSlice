@@ -32,6 +32,13 @@ public class ForNodeFlowEditor extends FlowEditor {
         this.graph = pdgInfo.cfg;
     }
 
+    public ForNodeFlowEditor(PDGInfo pdgInfo, CFNode forNode) {
+        super(pdgInfo);
+        this.forNode = forNode;
+        this.forPDNode = pdgInfo.findCDNode(forNode);
+        this.graph = pdgInfo.cfg;
+    }
+
     public void parse() {
         brTrue = graph.copyOutgoingEdges(forNode).stream()
                 .filter(edge -> edge.label.type == CFEdge.Type.TRUE)

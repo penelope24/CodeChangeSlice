@@ -35,6 +35,16 @@ public class WhileNodeFlowEditor extends FlowEditor {
                 .collect(Collectors.toSet());
     }
 
+    public WhileNodeFlowEditor(PDGInfo pdgInfo, CFNode whileNode) {
+        super(pdgInfo);
+        this.whileNode = whileNode;
+        this.graph = pdgInfo.cfg;
+        this.whilePDNode = pdgInfo.findCDNode(whileNode);
+        this.skeletonPDNodes = skeletonNodes.stream()
+                .map(pdgInfo::findCDNode)
+                .collect(Collectors.toSet());
+    }
+
     public void parse() {
         brTrue = graph.copyOutgoingEdges(whileNode).stream()
                 .filter(edge -> edge.label.type == CFEdge.Type.TRUE)

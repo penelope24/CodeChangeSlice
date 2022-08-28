@@ -31,7 +31,6 @@ public class SwitchNodeEditor extends FlowEditor{
     PDNode switchPDNode;
     ControlFlowGraph cfg;
     ControlDependenceGraph cdg;
-    List<Integer> chLines;
     //parse
     List<CFNode> caseNodesList = new ArrayList<>();
     CFNode defaultNode;
@@ -44,7 +43,14 @@ public class SwitchNodeEditor extends FlowEditor{
         this.switchPDNode = pdgInfo.findCDNode(switchNode);
         this.cfg = pdgInfo.cfg;
         this.cdg = pdgInfo.cdg;
-        this.chLines = sliceManager.chLines;
+    }
+
+    public SwitchNodeEditor(PDGInfo pdgInfo, CFNode switchNode) {
+        super(pdgInfo);
+        this.switchNode = switchNode;
+        this.switchPDNode = pdgInfo.findCDNode(switchNode);
+        this.cfg = pdgInfo.cfg;
+        this.cdg = pdgInfo.cdg;
     }
 
     public void parse() {

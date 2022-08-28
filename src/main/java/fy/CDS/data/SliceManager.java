@@ -126,6 +126,8 @@ public class SliceManager {
         this.exitNodes = resControlFlowNodes.stream()
                 .filter(node -> node.isTerminal() || node.getLineOfCode() == -1)
                 .collect(Collectors.toSet());
+        assert Stream.of(resDataFlowNodes, resDataFlowEdges, resControlFlowNodes, resControlFlowEdges)
+                .noneMatch(t -> t.contains(null));
     }
 
 

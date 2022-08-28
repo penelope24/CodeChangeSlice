@@ -23,60 +23,32 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class FlowEditorTest {
-    String javaFile = "/Users/fy/Documents/MyProjects/CodeChangeCases/reproduce/rep1/fixed.java";
-    String output = "/Users/fy/Documents/MyProjects/CodeChangeCases/reproduce/rep1";
+    String javaFile = "/Users/fy/Documents/MyProjects/CodeChangeCases/bug/program_graphs/bug1/buggy.java";
+    String output = "/Users/fy/Documents/MyProjects/CodeChangeCases/bug/program_graphs/bug1";
+
 
     @Test
-    void test() throws IOException {
-        ProgramDependeceGraph graph = MyPDGBuilder.build(new File(javaFile));
-        int start = 53;
-        PDNode startNode = graph.DDS.copyVertexSet().stream()
-                .filter(node -> node.getLineOfCode() == start)
-                .findFirst().get();
-        int entry = 38;
-        PDNode entryNode = graph.DDS.copyVertexSet().stream()
-                .filter(node -> node.getLineOfCode() == entry)
-                .findFirst().get();
-        PDGInfo pdgInfo = new PDGInfo(graph);
-        PDGInfoParser.parse(pdgInfo);
-        CFNode entryCFNode = pdgInfo.findCFNodeByDDNode(entryNode);
-        SliceManager sliceManager = new SliceManager(pdgInfo, entryCFNode, Arrays.asList(startNode), Edit.Type.INSERT);
-        DDGTrackResult<PDNode, DDEdge> ddgTrackResult = DDGTracker.track(pdgInfo, startNode);
-        sliceManager.updateAfterDDGTrack(ddgTrackResult);
-        CDGTrackResult<PDNode> cdgTrackResult = CDGTracker.track(pdgInfo, ddgTrackResult);
-        sliceManager.updateAfterCDGTrack(cdgTrackResult);
-        sliceManager.updateBeforeCFGTrack();
-        CFGTracker cfgTracker = new CFGTracker(sliceManager);
-        cfgTracker.track();
-        sliceManager.updateAfterCFGTrack();
-        PaletteResult palette = sliceManager.setPalette();
-        if (sliceManager.is_ready_for_palette()) {
-            Slice slice = new Slice(sliceManager);
-            slice.setPaletteResult(palette);
-            DotExporter.exportDot(slice, output + "/test.dot");
-        }
-    }
-
-    @Test
-    void single_node_reproduce() {
+    void test_rep_original_node() {
+        int tgt_line = 67;
         ProgramDependeceGraph graph = MyPDGBuilder.build(new File(javaFile));
         PDGInfo pdgInfo = new PDGInfo(graph);
         PDGInfoParser.parse(pdgInfo);
-        CFNode target = graph.DDS.getCFG().copyVertexSet().stream()
-                .filter(node -> node.getLineOfCode() == 48)
+        CFNode targetNode = graph.DDS.getCFG().copyVertexSet().stream()
+                .filter(node -> node.getLineOfCode() == tgt_line)
                 .findFirst().get();
-        System.out.println(target);
-        SliceManager sliceManager = new SliceManager(pdgInfo, null, new LinkedList<>(), null);
-        IfNodeFlowEditor editor = new IfNodeFlowEditor(pdgInfo, new HashSet<>(), sliceManager, target);
-        editor.setTest(true);
-        editor.parse();
+        System.out.println("tgt node: " + targetNode);
+        Set<CFNode> worklist = pdgInfo.cfg.copyVertexSet().stream()
+                .filter(cfNode -> cfNode.getLineOfCode() >= 39)
+                .filter(cfNode -> cfNode.getLineOfCode() <= 74)
+                .collect(Collectors.toSet());
+        CFGTracker tracker = new CFGTracker(pdgInfo);
+        FlowEditor editor = tracker.parse(targetNode, worklist);
         editor.edit();
-        PaletteResult paletteResult = sliceManager.setPalette();
-        Slice rep = new Slice(sliceManager);
-        rep.setPaletteResult(paletteResult);
-        DotExporter.exportDot(rep, output + "/rep.dot");
+        Slice res = editor.getTmpFlowEditResult();
+        DotExporter.exportDotTest(res, output + "/rep_node_" + tgt_line + ".dot");
     }
 
     @Test

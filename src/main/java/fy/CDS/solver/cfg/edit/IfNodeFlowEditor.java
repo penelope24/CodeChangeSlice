@@ -56,6 +56,13 @@ public class IfNodeFlowEditor extends FlowEditor {
         this.graph = pdgInfo.cfg;
     }
 
+    public IfNodeFlowEditor(PDGInfo pdgInfo, CFNode ifNode) {
+        super(pdgInfo);
+        this.ifNode = ifNode;
+        this.ifPDNode = pdgInfo.findCDNode(ifNode);
+        this.graph = pdgInfo.cfg;
+    }
+
     public void parse() {
         this.ifType = analyze_if_type();
         brTrue = graph.copyOutgoingEdges(ifNode).stream()
@@ -174,7 +181,14 @@ public class IfNodeFlowEditor extends FlowEditor {
 
     public void edit(){
         // true
-        analyzeBranch(ifNode, validChildrenTrue, CFEdge.Type.TRUE, endNode);
+        if (!validChildrenTrue.isEmpty()) {
+            analyzeBranch(ifNode, validChildrenTrue, CFEdge.Type.TRUE, endNode);
+        }
+        else {
+            if (endNode != null) {
+                addEdge(ifNode, endNode, CFEdge.Type.TRUE);
+            }
+        }
         // false
         if (!validChildrenFalse.isEmpty()) {
             analyzeBranch(ifNode, validChildrenFalse, CFEdge.Type.FALSE, endNode);

@@ -133,6 +133,58 @@ public class DotExporter {
         }
     }
 
+    public static void exportDotTest(Slice slice, String dotFileName) {
+        System.out.println("exporting to : " + dotFileName);
+        try (PrintWriter dot = new PrintWriter(dotFileName, "UTF-8")) {
+            dot.println("digraph " + "SLICE {");
+            Map<CFNode, String> controlFlowNodeIdMap = new LinkedHashMap<>();
+            Map<PDNode, String> dataFowNodeIdMap = new LinkedHashMap<>();
+            Map<ASNode, String> asNodeStringMap = new LinkedHashMap<>();
+            dot.println("  // graph-vertices");
+            int nodeCount = 1;
+            for (CFNode cfNode : slice.copyVertexSet()) {
+                String name = "v" + nodeCount++;
+                controlFlowNodeIdMap.put(cfNode, name);
+                PDNode pdNode = cfNode.getPDNode();
+                if (pdNode != null)
+                    dataFowNodeIdMap.put(pdNode, name);
+                StringBuilder label = new StringBuilder("  [label=\"");
+                if (cfNode.getLineOfCode() > 0)
+                    label.append(cfNode.getLineOfCode()).append(":  ");
+                label.append(StringUtils.escape(cfNode.getCode())).append("\"").append("];");
+                dot.println("  " + name + label.toString());
+            }
+            for (PDNode pdNode : slice.dataNodes) {
+                if (!dataFowNodeIdMap.containsKey(pdNode)) {
+                    String name = "v" + nodeCount++;
+                    dataFowNodeIdMap.put(pdNode, name);
+                    StringBuilder label = new StringBuilder("  [label=\"");
+                    if (pdNode.getLineOfCode() > 0)
+                        label.append(pdNode.getLineOfCode()).append(":  ");
+                    label.append(StringUtils.escape(pdNode.getCode())).append("\"];");
+                    dot.println("  " + name + label.toString());
+                }
+            }
+            dot.println("  // graph-edges");
+            for (Edge<CFNode, CFEdge> controlFlowEdge : slice.copyEdgeSet()) {
+                String src = controlFlowNodeIdMap.get(controlFlowEdge.source);
+                String trg = controlFlowNodeIdMap.get(controlFlowEdge.target);
+                String edgeDotStr = DotPalette.getEdgeDotStr(controlFlowEdge);
+                dot.println("  " + src + " -> " + trg + edgeDotStr +
+                        "label=\"" + controlFlowEdge.label.type + "\"];");
+            }
+            for (Edge<PDNode, DDEdge> dataEdge : slice.dataFlowEdges) {
+                String src = dataFowNodeIdMap.get(dataEdge.source);
+                String trg = dataFowNodeIdMap.get(dataEdge.target);
+                String edgeDotStr = DotPalette.getEdgeDotStr(dataEdge);
+                dot.println("  " + src + " -> " + trg + edgeDotStr + "label=\" (" + dataEdge.label.var + ")\"];");
+            }
+            dot.println("  // end-of-graph\n}");
+        } catch (UnsupportedEncodingException | FileNotFoundException ex) {
+            Logger.error(ex);
+        }
+    }
+
     public static void exportDot(InterProcedureSlice slice, String dotFileName) {
         //todo
     }

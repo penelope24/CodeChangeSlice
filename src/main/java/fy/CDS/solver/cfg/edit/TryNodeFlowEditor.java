@@ -32,6 +32,13 @@ public class TryNodeFlowEditor extends FlowEditor{
         this.graph = pdgInfo.cfg;
     }
 
+    public TryNodeFlowEditor(PDGInfo pdgInfo, CFNode tryNode) {
+        super(pdgInfo);
+        this.tryNode = tryNode;
+        this.tryPDNode = pdgInfo.findCDNode(tryNode);
+        this.graph = pdgInfo.cfg;
+    }
+
     public void parse() {
         tryBranch = graph.copyOutgoingEdges(tryNode).stream()
                 .findFirst().orElse(null);

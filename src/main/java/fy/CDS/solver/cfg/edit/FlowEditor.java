@@ -33,6 +33,14 @@ public class FlowEditor extends ControlFlowSolver {
         this.sliceManager = sliceManager;
     }
 
+    // for test only
+    public FlowEditor(PDGInfo pdgInfo) {
+        super(pdgInfo);
+        this.test = true;
+        this.skeletonNodes = new LinkedHashSet<>();
+        this.skeletonPDNodes = new LinkedHashSet<>();
+    }
+
     public void parse() {}
 
     public void edit() {}
@@ -243,18 +251,24 @@ public class FlowEditor extends ControlFlowSolver {
     }
 
     public void addEdge(CFNode src, CFNode tgt, CFEdge.Type type) {
-        if (src == null || tgt == null) return;
-        sliceManager.resControlFlowNodes.add(src);
-        sliceManager.resControlFlowNodes.add(tgt);
-        Edge<CFNode, CFEdge> newEdge = new Edge<>(src, new CFEdge(type), tgt);
-        if (!contains_edge(sliceManager.resControlFlowEdges, newEdge)) {
-            sliceManager.resControlFlowEdges.add(newEdge);
+        if (sliceManager != null) {
+            if (src == null || tgt == null) return;
+            sliceManager.resControlFlowNodes.add(src);
+            sliceManager.resControlFlowNodes.add(tgt);
+            Edge<CFNode, CFEdge> newEdge = new Edge<>(src, new CFEdge(type), tgt);
+            if (!contains_edge(sliceManager.resControlFlowEdges, newEdge)) {
+                sliceManager.resControlFlowEdges.add(newEdge);
+            }
         }
-        // also add to tmp flow edit result
-        tmpFlowEditResult.addVertex(src);
-        tmpFlowEditResult.addVertex(tgt);
-        if (!tmpFlowEditResult.containsEdge(newEdge)) {
-            tmpFlowEditResult.addEdge(newEdge);
+        else {
+            // test mode
+            if (src == null || tgt == null) return;
+            tmpFlowEditResult.addVertex(src);
+            tmpFlowEditResult.addVertex(tgt);
+            Edge<CFNode, CFEdge> newEdge = new Edge<>(src, new CFEdge(type), tgt);
+            if (!tmpFlowEditResult.containsEdge(newEdge)) {
+                tmpFlowEditResult.addEdge(newEdge);
+            }
         }
     }
 
