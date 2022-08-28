@@ -27,41 +27,41 @@ public class CDGParser{
             analyze_node(node);
             analyze_node2(node);
         }
-        // 分析级联情形
-        ParentSolver parentSolver = new ParentSolver(pdgInfo.cdg);
-        ChildNodeSolver childNodeSolver = new ChildNodeSolver(pdgInfo.cdg);
-        Set<PDNode> roots = cdg.copyVertexSet().stream()
-                .filter(node -> node.getType() == NodeType.ROOT)
-                .collect(Collectors.toSet());
-        for (PDNode root : roots) {
-            PDNode cascade_start_node = null;
-            List<PDNode> cascadeContainingNodes = new ArrayList<>();
-            // bfs
-            Deque<Edge<PDNode, CDEdge>> visiting = new ArrayDeque<>();
-            Edge<PDNode, CDEdge> dummy = new Edge<>(null, null, root);
-            visiting.add(dummy);
-            while (!visiting.isEmpty()) {
-                Edge<PDNode, CDEdge> edge = visiting.pop();
-                PDNode node = edge.target;
-                String code = node.getCode();
-                if (code.startsWith("FOLLOW-")) {
-                    List<PDNode> casChildren = childNodeSolver.find_first_level_children(node);
-                    cascadeContainingNodes.addAll(casChildren);
-                    PDNode cascadeNode = parentSolver.find_first_par_loose(node);
-                    cascadeNode.setProperty("cascade", true);
-                }
-                if (code.equals("FOLLOW-1")) {
-                    cascade_start_node = parentSolver.find_first_par_loose(node);
-                    cascade_start_node.setProperty("cascade_start", true);
-                }
-                visiting.addAll(cdg.copyOutgoingEdges(node));
-            }
-            if (cascade_start_node != null) {
-                PDNode cascade_containing_node = parentSolver.find_first_par(cascade_start_node);
-                cascade_containing_node.setProperty("cascade_contain", true);
-                cascade_containing_node.setProperty("cascade_children", cascadeContainingNodes);
-            }
-        }
+//        // 分析级联情形
+//        ParentSolver parentSolver = new ParentSolver(pdgInfo.cdg);
+//        ChildNodeSolver childNodeSolver = new ChildNodeSolver(pdgInfo.cdg);
+//        Set<PDNode> roots = cdg.copyVertexSet().stream()
+//                .filter(node -> node.getType() == NodeType.ROOT)
+//                .collect(Collectors.toSet());
+//        for (PDNode root : roots) {
+//            PDNode cascade_start_node = null;
+//            List<PDNode> cascadeContainingNodes = new ArrayList<>();
+//            // bfs
+//            Deque<Edge<PDNode, CDEdge>> visiting = new ArrayDeque<>();
+//            Edge<PDNode, CDEdge> dummy = new Edge<>(null, null, root);
+//            visiting.add(dummy);
+//            while (!visiting.isEmpty()) {
+//                Edge<PDNode, CDEdge> edge = visiting.pop();
+//                PDNode node = edge.target;
+//                String code = node.getCode();
+//                if (code.startsWith("FOLLOW-")) {
+//                    List<PDNode> casChildren = childNodeSolver.find_first_level_children(node);
+//                    cascadeContainingNodes.addAll(casChildren);
+//                    PDNode cascadeNode = parentSolver.find_first_par_loose(node);
+//                    cascadeNode.setProperty("cascade", true);
+//                }
+//                if (code.equals("FOLLOW-1")) {
+//                    cascade_start_node = parentSolver.find_first_par_loose(node);
+//                    cascade_start_node.setProperty("cascade_start", true);
+//                }
+//                visiting.addAll(cdg.copyOutgoingEdges(node));
+//            }
+//            if (cascade_start_node != null) {
+//                PDNode cascade_containing_node = parentSolver.find_first_par(cascade_start_node);
+//                cascade_containing_node.setProperty("cascade_contain", true);
+//                cascade_containing_node.setProperty("cascade_children", cascadeContainingNodes);
+//            }
+//        }
 
     }
 

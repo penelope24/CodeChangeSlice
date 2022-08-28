@@ -45,91 +45,60 @@ public class FlowEditor extends ControlFlowSolver {
 
     public void edit() {}
 
+//    public List<PDNode> find(PDNode brNode) {
+//        ChildNodeSolver childNodeSolver = new ChildNodeSolver(pdgInfo.cdg);
+//
+//    }
+
     /**
      *  找到一个branch节点下所有符合要求的孩子节点
      * @param brNode
      * @return
      */
     public List<PDNode> findValidChildrenForBrNode(PDNode brNode) {
-        ChildNodeSolver childNodeSolver = new ChildNodeSolver(pdgInfo.cdg);
-        List<PDNode> first_level_children = childNodeSolver.find_first_level_children(brNode);
-        // 如果是级联的if节点，那么直接找出所有级联的子节点
-        if (brNode.getProperty("cascade_contain") != null) {
-            List<PDNode> cascadeNodes = (List<PDNode>) brNode.getProperty("cascade_children");
-            for (PDNode casNode : cascadeNodes) {
-                if (!first_level_children.contains(casNode)) {
-                    first_level_children.add(casNode);
-                }
-            }
-            // 去除list中重复项并返回
-            Set<PDNode> set = new LinkedHashSet<>(first_level_children);
-            first_level_children.clear();
-            first_level_children.addAll(set);
-            return first_level_children;
-        }
-        // 如果不是级联情形
-        List<PDNode> validPDChildren = new ArrayList<>();
-        for (PDNode node : first_level_children) {
+        ChildNodeSolver solver = new ChildNodeSolver(pdgInfo.cdg);
+        Set<PDNode> resChildren = new LinkedHashSet<>();
+        List<PDNode> firstLevel = solver.find_first_level_children(brNode);
+        for (PDNode node : firstLevel) {
             if (is_valid(node)) {
-                validPDChildren.add(node);
+                resChildren.add(node);
             }
             else if (node.isBranch()) {
-                List<PDNode> validLevel = null;
-                // todo a bug brnode should be node
-                List<List<PDNode>> levels = childNodeSolver.find_all_children_level_order(node);
+                List<List<PDNode>> levels = solver.find_all_children_level_order(node);
                 for (List<PDNode> level : levels) {
                     if (level.stream().anyMatch(this::is_valid)) {
-                        validLevel = level;
+                        level.stream()
+                                .filter(this::is_valid)
+                                .forEach(resChildren::add);
                         break;
                     }
                 }
-                if (validLevel != null) {
-                    validLevel.removeIf(node1 -> !is_valid(node1));
-                    validPDChildren.addAll(validLevel);
-                }
             }
         }
-        return validPDChildren;
+        return new ArrayList<>(resChildren);
     }
 
-    public List<PDNode> findValidChildrenForBrNode(PDNode beNode, CDEdge.Type filter) {
-        ChildNodeSolver childNodeSolver = new ChildNodeSolver(pdgInfo.cdg);
-        List<PDNode> first_level_children = childNodeSolver.find_first_level_children(beNode, filter);
-        if (beNode.getProperty("cascade_contain") != null) {
-            List<PDNode> cascadeNodes = (List<PDNode>) beNode.getProperty("cascade_children");
-            for (PDNode casNode : cascadeNodes) {
-                if (!first_level_children.contains(casNode)) {
-                    first_level_children.add(casNode);
-                }
-            }
-            Set<PDNode> set = new LinkedHashSet<>(first_level_children);
-            first_level_children.clear();
-            first_level_children.addAll(set);
-            return first_level_children;
-        }
-        List<PDNode> validPDChildren = new ArrayList<>();
-        for (PDNode node : first_level_children) {
+    public List<PDNode> findValidChildrenForBrNode(PDNode brNode, CDEdge.Type filter) {
+        ChildNodeSolver solver = new ChildNodeSolver(pdgInfo.cdg);
+        Set<PDNode> resChildren = new LinkedHashSet<>();
+        List<PDNode> firstLevel = solver.find_first_level_children(brNode, filter);
+        for (PDNode node : firstLevel) {
             if (is_valid(node)) {
-                validPDChildren.add(node);
+                resChildren.add(node);
             }
             else if (node.isBranch()) {
-                List<PDNode> validLevel = null;
-                List<List<PDNode>> levels = childNodeSolver.find_all_children_level_order(node);
+                List<List<PDNode>> levels = solver.find_all_children_level_order(node);
                 for (List<PDNode> level : levels) {
                     if (level.stream().anyMatch(this::is_valid)) {
-                        validLevel = level;
+                        level.stream()
+                                .filter(this::is_valid)
+                                .forEach(resChildren::add);
                         break;
                     }
                 }
-                // 下面这条assert是不安全的（如果以brnode为起始点不一定满足下面的assert）
-//                assert validLevel != null;
-                if (validLevel != null) {
-                    validLevel.removeIf(node1 -> !is_valid(node1));
-                    validPDChildren.addAll(validLevel);
-                }
             }
         }
-        return validPDChildren;
+        return new ArrayList<>(resChildren);
     }
 
     public boolean is_valid(PDNode node) {

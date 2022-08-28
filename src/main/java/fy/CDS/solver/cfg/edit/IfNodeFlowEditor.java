@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 public class IfNodeFlowEditor extends FlowEditor {
 
     private enum Type {
-        basic,
-        follow_up,
+        normal,
+//        follow_up,
         nested
     }
     // provide
@@ -77,7 +77,7 @@ public class IfNodeFlowEditor extends FlowEditor {
         Deque<Edge<CFNode, CFEdge>> visiting = new ArrayDeque<>();
         Deque<Edge<CFNode, CFEdge>> visited = new ArrayDeque<>();
         switch (ifType) {
-            case basic:
+            case normal:
                 visiting.add(brFalse);
                 visiting.add(brTrue);
                 while (!visiting.isEmpty()) {
@@ -95,18 +95,18 @@ public class IfNodeFlowEditor extends FlowEditor {
                     });
                 }
                 break;
-            case follow_up:
-                visiting.add(brFalse);
-                while (!visiting.isEmpty()) {
-                    Edge<CFNode, CFEdge> edge = visiting.pop();
-                    CFNode node = edge.target;
-                    if (node.getCode().equals("endif")) {
-                        endNode = node;
-                        break;
-                    }
-                    visiting.addAll(graph.copyOutgoingEdges(node));
-                }
-                break;
+//            case follow_up:
+//                visiting.add(brFalse);
+//                while (!visiting.isEmpty()) {
+//                    Edge<CFNode, CFEdge> edge = visiting.pop();
+//                    CFNode node = edge.target;
+//                    if (node.getCode().equals("endif")) {
+//                        endNode = node;
+//                        break;
+//                    }
+//                    visiting.addAll(graph.copyOutgoingEdges(node));
+//                }
+//                break;
             case nested:
                 Deque<Edge<CFNode, CFEdge>> reverse = new ArrayDeque<>();
                 Edge<CFNode, CFEdge> dummy = new Edge<>(null, null, ifNode);
@@ -167,12 +167,9 @@ public class IfNodeFlowEditor extends FlowEditor {
         List<PDNode> children = solver.find_first_level_children(ifPDNode);
         boolean has_inner_if = children.stream()
                 .anyMatch(node -> node.getType() == NodeType.IF);
-        if (ifPDNode.getProperty("cascade") != null
-                || ifPDNode.getProperty("cascade_start") != null) {
-            return Type.follow_up;
-        }
-        else if (!has_inner_if) {
-            return Type.basic;
+
+        if (!has_inner_if) {
+            return Type.normal;
         }
         else {
             return Type.nested;
@@ -243,7 +240,7 @@ public class IfNodeFlowEditor extends FlowEditor {
     }
 
     private void handle_last_child(CFNode lastChild) {
-        if (!lastChild.isTerminal() && ifType != Type.follow_up) {
+        if (!lastChild.isTerminal()) {
             CFNode child_end = transfer(lastChild);
             if (child_end != null && endNode != null) {
                 addEdge(child_end, endNode, CFEdge.Type.EPSILON);

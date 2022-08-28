@@ -28,8 +28,20 @@ public class ChildNodeSolver extends ControlDepSolver {
                 if (node.getLineOfCode() != 0) {
                     level.add(node);
                 }
-                visiting.addAll(graph.copyOutgoingEdges(node));
+                // add to visiting
+                if (node.getCode().equals("ELSE")
+                        && graph.copyOutgoingEdges(node).size() == 1
+                        && graph.copyOutgoingEdges(node).stream()
+                        .findFirst().get().target.getCode().startsWith("FOLLOW-")) {
+                    PDNode followNode = graph.copyOutgoingEdges(node).stream()
+                            .findFirst().get().target;
+                    visiting.addAll(graph.copyOutgoingEdges(followNode));
+                }
+                else {
+                    visiting.addAll(graph.copyOutgoingEdges(node));
+                }
             }
+            // first non-empty level
             if (!level.isEmpty()) {
                 return level;
             }
@@ -71,7 +83,17 @@ public class ChildNodeSolver extends ControlDepSolver {
                 if (edge.source != null && node.getLineOfCode() != 0) {
                     level.add(node);
                 }
-                visiting.addAll(graph.copyOutgoingEdges(node));
+                if (node.getCode().equals("ELSE")
+                        && graph.copyOutgoingEdges(node).size() == 1
+                        && graph.copyOutgoingEdges(node).stream()
+                        .findFirst().get().target.getCode().startsWith("FOLLOW-")) {
+                    PDNode followNode = graph.copyOutgoingEdges(node).stream()
+                            .findFirst().get().target;
+                    visiting.addAll(graph.copyOutgoingEdges(followNode));
+                }
+                else {
+                    visiting.addAll(graph.copyOutgoingEdges(node));
+                }
             }
             if (!level.isEmpty()) {
                 res.add(level);
@@ -98,7 +120,17 @@ public class ChildNodeSolver extends ControlDepSolver {
                 if (edge.source != null && node.getLineOfCode() != 0) {
                     level.add(node);
                 }
-                visiting.addAll(graph.copyOutgoingEdges(node));
+                if (node.getCode().equals("ELSE")
+                        && graph.copyOutgoingEdges(node).size() == 1
+                        && graph.copyOutgoingEdges(node).stream()
+                        .findFirst().get().target.getCode().startsWith("FOLLOW-")) {
+                    PDNode followNode = graph.copyOutgoingEdges(node).stream()
+                            .findFirst().get().target;
+                    visiting.addAll(graph.copyOutgoingEdges(followNode));
+                }
+                else {
+                    visiting.addAll(graph.copyOutgoingEdges(node));
+                }
             }
             if (!level.isEmpty()) {
                 res.add(level);
@@ -119,8 +151,20 @@ public class ChildNodeSolver extends ControlDepSolver {
             if (edge.source != null && node.getLineOfCode() != 0) {
                 res.add(node);
             }
-            visiting.addAll(graph.copyOutgoingEdges(node));
+            if (node.getCode().equals("ELSE")
+                    && graph.copyOutgoingEdges(node).size() == 1
+                    && graph.copyOutgoingEdges(node).stream()
+                    .findFirst().get().target.getCode().startsWith("FOLLOW-")) {
+                PDNode followNode = graph.copyOutgoingEdges(node).stream()
+                        .findFirst().get().target;
+                visiting.addAll(graph.copyOutgoingEdges(followNode));
+            }
+            else {
+                visiting.addAll(graph.copyOutgoingEdges(node));
+            }
         }
         return res;
     }
+
+
 }
