@@ -8,6 +8,7 @@ import ghaffarian.progex.graphs.pdg.PDNode;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Set;
 
 /**
  * 从start node开始向下追溯，考虑start node中所有的变量
@@ -23,9 +24,11 @@ public class ForwardDataFlowSolver extends DataFlowSolver {
     }
 
     public void track(PDNode startNode) {
+        // find instant data bind nodes
+        Set<Edge<PDNode, DDEdge>> instantDataBindEdges = graph.copyOutgoingEdges(startNode);
+        result.addDataNode(startNode);
         // bfs
-        Edge<PDNode, DDEdge> dummy = new Edge<>(null, null, startNode);
-        visiting.add(dummy);
+        visiting.addAll(instantDataBindEdges);
         while (!visiting.isEmpty()) {
             Edge<PDNode, DDEdge> curEdge = visiting.pop();
             PDNode curNode = curEdge.target;

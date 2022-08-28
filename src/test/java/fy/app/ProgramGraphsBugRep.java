@@ -1,7 +1,12 @@
 package fy.app;
 
+import fy.CDS.CodeDiffSlicer;
+import fy.CDS.data.Slice;
+import fy.CDS.export.DotExporter;
 import fy.GW.GitWalker;
 import fy.PROGEX.build.MyPDGBuilder;
+import fy.PROGEX.parse.PDGInfo;
+import fy.PROGEX.parse.PDGInfoParser;
 import ghaffarian.progex.graphs.pdg.ProgramDependeceGraph;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +26,22 @@ public class ProgramGraphsBugRep {
         String f2 = "/Users/fy/Documents/MyProjects/CodeChangeCases/bug/program_graphs/bug1/fixed.java";
         List<Integer> ll1 = Collections.singletonList(65);
         List<Integer> ll2 = Collections.singletonList(69);
-        BugRep.rep2(f1, f2, ll1, ll2, base);
+        // v1
+        {
+            ProgramDependeceGraph graph = MyPDGBuilder.build(new File(f1));
+            PDGInfo pdgInfo = new PDGInfo(graph);
+            PDGInfoParser.parse(pdgInfo);
+            Slice slice = CodeDiffSlicer.slice(pdgInfo, 65, null,"brNode");
+            DotExporter.exportDot(slice, base + "/buggy.dot");
+        }
+        // v2
+        {
+            ProgramDependeceGraph graph = MyPDGBuilder.build(new File(f2));
+            PDGInfo pdgInfo = new PDGInfo(graph);
+            PDGInfoParser.parse(pdgInfo);
+            Slice slice = CodeDiffSlicer.slice(pdgInfo, 69, null,"node");
+            DotExporter.exportDot(slice, base + "/fixed.dot");
+        }
     }
 
     @Test

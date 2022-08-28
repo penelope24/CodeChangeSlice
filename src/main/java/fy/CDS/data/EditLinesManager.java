@@ -30,15 +30,9 @@ public class EditLinesManager {
     public EditLinesManager(PDGInfo pdgInfo, List<Integer> hunk) {
         this.pdgInfo = pdgInfo;
         this.hunk = hunk;
-        analyzeEntryNodes();
+        this.entryNodes = analyzeEntryNodes(pdgInfo);
         analyzeHunk();
 //        analyzeExtraNodes();
-    }
-
-    private void analyzeEntryNodes() {
-        this.entryNodes = pdgInfo.cfg.copyVertexSet().stream()
-                .filter(node -> node.getType() == NodeType.ROOT)
-                .collect(Collectors.toSet());
     }
 
     private void analyzeHunk(){
@@ -57,7 +51,7 @@ public class EditLinesManager {
         assert hunk.size() == validLines.size() + invalidLines.size();
         Map<PDNode, CFNode> reversedMap = new LinkedHashMap<>();
         validLines.forEach(line -> {
-            CFNode nearestEntryNode = findNearestEntryNode(line);
+            CFNode nearestEntryNode = findNearestEntryNode(this.entryNodes, line);
             PDNode startNode = startNodes.stream()
                     .filter(node -> node.getLineOfCode() == line)
                     .findFirst().orElse(null);
@@ -68,8 +62,14 @@ public class EditLinesManager {
                 .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
     }
 
-    private CFNode findNearestEntryNode(int start_pos) {
-        return this.entryNodes.stream()
+    public static Set<CFNode> analyzeEntryNodes(PDGInfo pdgInfo) {
+        return pdgInfo.cfg.copyVertexSet().stream()
+                .filter(node -> node.getType() == NodeType.ROOT)
+                .collect(Collectors.toSet());
+    }
+
+    public static CFNode findNearestEntryNode(Set<CFNode> entryNodes, int start_pos) {
+        return entryNodes.stream()
             .filter(node -> node.getLineOfCode() <= start_pos)
             .min(Comparator.comparing(node -> Math.abs(node.getLineOfCode() - start_pos)))
             .orElse(null);

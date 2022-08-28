@@ -6,10 +6,8 @@ import ghaffarian.progex.graphs.pdg.DDEdge;
 import ghaffarian.progex.graphs.pdg.DataDependenceGraph;
 import ghaffarian.progex.graphs.pdg.PDNode;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 从start node开始向上追溯，只考虑start node中指定的变量
@@ -24,9 +22,13 @@ public class BackwardDataFlowSolverWithVar extends DataFlowSolver {
     }
 
     public void track(PDNode startNode, String var) {
+        // find instant data bind nodes
+        Set<Edge<PDNode, DDEdge>> instantDataBindEdges = graph.copyIncomingEdges(startNode).stream()
+                .filter(edge -> edge.label.var.equals(var))
+                .collect(Collectors.toSet());
+        result.addDataNode(startNode);
         // bfs
-        Edge<PDNode, DDEdge> dummy = new Edge<>(startNode, null, null);
-        visiting.add(dummy);
+        visiting.addAll(instantDataBindEdges);
         while (!visiting.isEmpty()) {
             Edge<PDNode, DDEdge> curEdge = visiting.pop();
             PDNode curNode = curEdge.source;

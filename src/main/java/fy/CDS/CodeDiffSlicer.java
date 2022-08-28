@@ -20,9 +20,7 @@ import ghaffarian.progex.graphs.pdg.DDEdge;
 import ghaffarian.progex.graphs.pdg.PDNode;
 import org.eclipse.jgit.diff.Edit;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CodeDiffSlicer {
 
@@ -35,8 +33,7 @@ public class CodeDiffSlicer {
     public static List<Slice> slice (PDGInfo pdgInfo, List<Integer> chLines, Edit.Type editType) {
         List<Slice> slices = new ArrayList<>();
         EditLinesManager editLinesManager = new EditLinesManager(pdgInfo, chLines);
-        Map<CFNode, List<PDNode>> entry2startNodes = editLinesManager.entry2startNodes;
-        for (Map.Entry<CFNode, List<PDNode>> entry : entry2startNodes.entrySet()) {
+        for (Map.Entry<CFNode, List<PDNode>> entry : editLinesManager.entry2startNodes.entrySet()) {
             CFNode node = entry.getKey();
             List<PDNode> pdNodes = entry.getValue();
             SliceManager manager = new SliceManager(pdgInfo, node, pdNodes, editType);
@@ -67,6 +64,38 @@ public class CodeDiffSlicer {
         return slices;
     }
 
-
+    public static Slice slice(PDGInfo pdgInfo, int line, Edit.Type editType, String var) {
+        Set<CFNode> entryNodes = EditLinesManager.analyzeEntryNodes(pdgInfo);
+        CFNode entry = EditLinesManager.findNearestEntryNode(entryNodes, line);
+        PDNode startNode = pdgInfo.ddg.copyVertexSet().stream()
+                .filter(node -> node.getLineOfCode() == line)
+                .findFirst().orElse(null);
+        if (startNode == null) return null;
+        SliceManager manager = new SliceManager(pdgInfo, entry, startNode, var, editType);
+        if (manager.is_valid_track) {
+            // data bind track
+            DDGTrackResult<PDNode, DDEdge> ddgTrackResult = DDGTracker.track(manager.pdgInfo, startNode, var);
+            manager.updateAfterDDGTrack(ddgTrackResult);
+            // control bind track
+            CDGTrackResult<PDNode> cdgTrackResult = CDGTracker.track(manager.pdgInfo, ddgTrackResult, var);
+            manager.updateAfterCDGTrack(cdgTrackResult);
+            // cfg track
+            manager.updateBeforeCFGTrack();
+            if (manager.is_ready_for_slice()) {
+                CFGTracker cfgTracker = new CFGTracker(manager);
+                cfgTracker.track();
+                manager.updateAfterCFGTrack();
+                PaletteResult paletteResult = manager.setPalette();
+                if (manager.is_ready_for_palette()) {
+                    Slice slice = new Slice(manager);
+                    slice.setPaletteResult(paletteResult);
+                    return slice;
+                } else {
+                    throw new IllegalStateException("not ready for export");
+                }
+            }
+        }
+        return null;
+    }
 
 }

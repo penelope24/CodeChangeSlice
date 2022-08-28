@@ -36,7 +36,7 @@ public class ControlBindNodeSolver extends ControlDepSolver{
         });
     }
 
-    private boolean is_binding(PDNode brNode) {
+    public boolean is_binding(PDNode brNode) {
         SiblingSolver siblingSolver = new SiblingSolver(graph);
         List<PDNode> predSiblings = siblingSolver.find_pred_siblings(brNode);
         return predSiblings.stream().anyMatch(node -> {

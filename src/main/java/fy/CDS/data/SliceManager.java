@@ -12,10 +12,7 @@ import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
 import ghaffarian.progex.graphs.pdg.*;
 import org.eclipse.jgit.diff.Edit;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +21,7 @@ public class SliceManager {
     public PDGInfo pdgInfo;
     public CFNode entryNode;
     public List<PDNode> startNodes;
+    public Map<PDNode, String> start_point = new HashMap<>();
     public Edit.Type editType;
     public DDGTrackResult<PDNode, DDEdge> ddgTrackResult;
     public CDGTrackResult<PDNode> cdgTrackResult;
@@ -57,6 +55,15 @@ public class SliceManager {
         this.pdgInfo = pdgInfo;
         this.entryNode = entryNode;
         this.startNodes = startNodes;
+        this.editType = editType;
+        init();
+    }
+
+    public SliceManager(PDGInfo pdgInfo, CFNode entryNode, PDNode startNode, String var, Edit.Type editType) {
+        this.pdgInfo = pdgInfo;
+        this.entryNode = entryNode;
+        this.start_point.put(startNode, var);
+        this.startNodes = Collections.singletonList(startNode);
         this.editType = editType;
         init();
     }

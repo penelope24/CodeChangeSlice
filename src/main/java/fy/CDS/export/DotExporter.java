@@ -79,6 +79,7 @@ public class DotExporter {
         }
     }
 
+    // export with palette
     public static void exportDot(Slice slice, String dotFileName) {
         System.out.println("exporting to : " + dotFileName);
         DotPalette palette = new DotPalette(slice.paletteResult);
@@ -121,18 +122,19 @@ public class DotExporter {
                 dot.println("  " + src + " -> " + trg + edgeDotStr +
                         "label=\"" + controlFlowEdge.label.type + "\"];");
             }
-//            for (Edge<PDNode, DDEdge> dataEdge : slice.dataFlowEdges) {
-//                String src = dataFowNodeIdMap.get(dataEdge.source);
-//                String trg = dataFowNodeIdMap.get(dataEdge.target);
-//                String edgeDotStr = DotPalette.getEdgeDotStr(dataEdge);
-//                dot.println("  " + src + " -> " + trg + edgeDotStr + "label=\" (" + dataEdge.label.var + ")\"];");
-//            }
+            for (Edge<PDNode, DDEdge> dataEdge : slice.dataFlowEdges) {
+                String src = dataFowNodeIdMap.get(dataEdge.source);
+                String trg = dataFowNodeIdMap.get(dataEdge.target);
+                String edgeDotStr = DotPalette.getEdgeDotStr(dataEdge);
+                dot.println("  " + src + " -> " + trg + edgeDotStr + "label=\" (" + dataEdge.label.var + ")\"];");
+            }
             dot.println("  // end-of-graph\n}");
         } catch (UnsupportedEncodingException | FileNotFoundException ex) {
             Logger.error(ex);
         }
     }
 
+    // export without palette (for cfg parse test)
     public static void exportDotTest(Slice slice, String dotFileName) {
         System.out.println("exporting to : " + dotFileName);
         try (PrintWriter dot = new PrintWriter(dotFileName, "UTF-8")) {
