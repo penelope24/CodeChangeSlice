@@ -36,10 +36,9 @@ public class BackwardDataFlowSolverWithVar extends DataFlowSolver {
             if (curEdge.target != null)
                 result.addDataFlowEdge(curEdge);
             // populating by data flow
-            if (visited.add(curEdge)) {
+            if (visited.add(curEdge) && graph.getInDegree(curNode) > 0) {
                 graph.copyIncomingEdges(curNode).forEach(edge -> {
-                    List<String> allDefs = Arrays.asList(edge.source.getAllDEFs());
-                    if (!visited.contains(edge) && allDefs.contains(var)) {
+                    if (!visited.contains(edge)) {
                         visiting.add(edge);
                     }
                 });

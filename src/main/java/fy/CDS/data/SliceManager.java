@@ -6,6 +6,7 @@ import fy.CDS.result.DDGTrackResult;
 import fy.CDS.result.PaletteResult;
 import fy.PROGEX.parse.PDGInfo;
 import ghaffarian.graphs.Edge;
+import ghaffarian.progex.NodeType;
 import ghaffarian.progex.graphs.cfg.CFEdge;
 import ghaffarian.progex.graphs.cfg.CFNode;
 import ghaffarian.progex.graphs.cfg.ControlFlowGraph;
@@ -132,6 +133,7 @@ public class SliceManager {
     public void updateAfterCFGTrack() {
         this.exitNodes = resControlFlowNodes.stream()
                 .filter(node -> node.isTerminal() || node.getLineOfCode() == -1)
+//                .filter(node -> node.getType() != NodeType.BREAK)
                 .collect(Collectors.toSet());
         assert Stream.of(resDataFlowNodes, resDataFlowEdges, resControlFlowNodes, resControlFlowEdges)
                 .noneMatch(t -> t.contains(null));

@@ -77,7 +77,7 @@ public class CodeDiffSlicer {
             DDGTrackResult<PDNode, DDEdge> ddgTrackResult = DDGTracker.track(manager.pdgInfo, startNode, var);
             manager.updateAfterDDGTrack(ddgTrackResult);
             // control bind track
-            CDGTrackResult<PDNode> cdgTrackResult = CDGTracker.track(manager.pdgInfo, ddgTrackResult, var);
+            CDGTrackResult<PDNode> cdgTrackResult = CDGTracker.track(manager.pdgInfo, ddgTrackResult);
             manager.updateAfterCDGTrack(cdgTrackResult);
             // cfg track
             manager.updateBeforeCFGTrack();

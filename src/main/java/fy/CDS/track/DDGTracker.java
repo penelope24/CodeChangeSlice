@@ -33,6 +33,7 @@ public class DDGTracker {
         // backward
         BackwardDataFlowSolverWithVar t1 = new BackwardDataFlowSolverWithVar(pdgInfo.ddg);
         t1.track(startNode, var);
+        result.addDDGTrackResult(t1.getResult());
         // forward
         ForwardDataFlowSolverWithVar t2 = new ForwardDataFlowSolverWithVar(pdgInfo.ddg);
         t2.track(startNode, var);

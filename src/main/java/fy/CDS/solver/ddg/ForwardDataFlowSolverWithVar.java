@@ -38,8 +38,7 @@ public class ForwardDataFlowSolverWithVar extends DataFlowSolver {
             // populating by data flow
             if (visited.add(curEdge)) {
                 graph.copyOutgoingEdges(curNode).forEach(edge -> {
-                    List<String> allUses = Arrays.asList(edge.target.getAllUSEs());
-                    if (!visited.contains(edge) && allUses.contains(var)) {
+                    if (!visited.contains(edge)) {
                         visiting.add(edge);
                     }
                 });

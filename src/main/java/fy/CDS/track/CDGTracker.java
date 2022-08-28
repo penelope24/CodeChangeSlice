@@ -26,16 +26,16 @@ public class CDGTracker {
         return result;
     }
 
-    public static CDGTrackResult<PDNode> track (PDGInfo pdgInfo, DDGTrackResult<PDNode, DDEdge> ddgTrackResult, String var) {
-        CDGTrackResult<PDNode> result = new CDGTrackResult<>();
-        Set<PDNode> dataBindingNodes = ddgTrackResult.getResDataNodes().stream()
-                .map(pdgInfo::findCDNode)
-                .collect(Collectors.toSet());
-        for (PDNode node : dataBindingNodes) {
-            ControlBindNodeSolverWithVar solver = new ControlBindNodeSolverWithVar(pdgInfo.cdg, node, 3, var);
-            solver.track();
-            result.addControlBindingNodes(solver.getControlBindingNodes());
-        }
-        return result;
-    }
+//    public static CDGTrackResult<PDNode> track (PDGInfo pdgInfo, DDGTrackResult<PDNode, DDEdge> ddgTrackResult, String var) {
+//        CDGTrackResult<PDNode> result = new CDGTrackResult<>();
+//        Set<PDNode> dataBindingNodes = ddgTrackResult.getResDataNodes().stream()
+//                .map(pdgInfo::findCDNode)
+//                .collect(Collectors.toSet());
+//        for (PDNode node : dataBindingNodes) {
+//            ControlBindNodeSolverWithVar solver = new ControlBindNodeSolverWithVar(pdgInfo.cdg, node, 3, var);
+//            solver.track();
+//            result.addControlBindingNodes(solver.getControlBindingNodes());
+//        }
+//        return result;
+//    }
 }
