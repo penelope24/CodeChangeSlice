@@ -32,6 +32,8 @@ public class ProgramGraphsBugRep {
         ProgramDependeceGraph graph2 = MyPDGBuilder.build(new File(f2));
         graph1.DDS.getCFG().exportDOT(base);
         graph2.DDS.getCFG().exportDOT(base);
+        graph1.CDS.exportDOT(base);
+        graph2.CDS.exportDOT(base);
     }
 
 }

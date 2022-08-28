@@ -32,7 +32,7 @@ class FlowEditorTest {
 
     @Test
     void test_rep_original_node() {
-        int tgt_line = 67;
+        int tgt_line = 62;
         ProgramDependeceGraph graph = MyPDGBuilder.build(new File(javaFile));
         PDGInfo pdgInfo = new PDGInfo(graph);
         PDGInfoParser.parse(pdgInfo);
@@ -45,9 +45,19 @@ class FlowEditorTest {
                 .filter(cfNode -> cfNode.getLineOfCode() <= 74)
                 .collect(Collectors.toSet());
         CFGTracker tracker = new CFGTracker(pdgInfo);
-        FlowEditor editor = tracker.parse(targetNode, worklist);
-        editor.edit();
-        Slice res = editor.getTmpFlowEditResult();
+        Map<CFNode, FlowEditor> editorMap = tracker.parse_test(worklist);
+//        for (FlowEditor editor : editorMap.values()) {
+//            editor.edit();
+//        }
+        CFNode t1 = graph.DDS.getCFG().copyVertexSet().stream()
+                .filter(node -> node.getLineOfCode() == 66)
+                .findFirst().get();
+        FlowEditor te1 = editorMap.get(t1);
+        te1.edit();
+        FlowEditor targetEditor = editorMap.get(targetNode);
+        targetEditor.edit();
+        Slice res = targetEditor.getTmpFlowEditResult();
+        res.add(te1.getTmpFlowEditResult());
         DotExporter.exportDotTest(res, output + "/rep_node_" + tgt_line + ".dot");
     }
 

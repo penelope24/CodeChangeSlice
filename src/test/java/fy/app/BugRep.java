@@ -47,14 +47,14 @@ public class BugRep {
             Slice slice = slices.get(0);
             DotExporter.exportDot(slice, base + "/buggy.dot");
         }
-//        // v2
-//        {
-//            ProgramDependeceGraph graph = MyPDGBuilder.build(new File(f2));
-//            PDGInfo pdgInfo = new PDGInfo(graph);
-//            PDGInfoParser.parse(pdgInfo);
-//            List<Slice> slices = CodeDiffSlicer.slice(pdgInfo, ll2, null);
-//            Slice slice = slices.get(0);
-//            DotExporter.exportDot(slice, base + "/fixed.dot");
-//        }
+        // v2
+        {
+            ProgramDependeceGraph graph = MyPDGBuilder.build(new File(f2));
+            PDGInfo pdgInfo = new PDGInfo(graph);
+            PDGInfoParser.parse(pdgInfo);
+            List<Slice> slices = CodeDiffSlicer.slice(pdgInfo, ll2, null);
+            Slice slice = slices.get(0);
+            DotExporter.exportDot(slice, base + "/fixed.dot");
+        }
     }
 }

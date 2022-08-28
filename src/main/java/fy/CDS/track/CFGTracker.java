@@ -65,7 +65,7 @@ public class CFGTracker {
     }
 
     // for test only
-    public FlowEditor parse(CFNode targetNode, Set<CFNode> worklist) {
+    public Map<CFNode, FlowEditor> parse_test(Set<CFNode> worklist) {
         Map<CFNode, FlowEditor> editorMap = new LinkedHashMap<>();
         for (CFNode cfNode : worklist) {
             switch (cfNode.getType()) {
@@ -97,7 +97,7 @@ public class CFGTracker {
 
             }
         }
-        return editorMap.get(targetNode);
+        return editorMap;
     }
 
     public void edit(Map<CFNode, FlowEditor> editorMap) {
