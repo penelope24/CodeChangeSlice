@@ -50,11 +50,7 @@ public class FlowEditor extends ControlFlowSolver {
 //
 //    }
 
-    /**
-     *  找到一个branch节点下所有符合要求的孩子节点
-     * @param startNode
-     * @return
-     */
+
     public List<PDNode> findValidChildrenForBrNode(PDNode startNode) {
         ChildNodeSolver solver = new ChildNodeSolver(pdgInfo.cdg);
         Set<PDNode> resChildren = new LinkedHashSet<>();
