@@ -51,16 +51,19 @@ public class FlowEditor extends ControlFlowSolver {
 //    }
 
 
-    public List<PDNode> findValidChildrenForBrNode(PDNode startNode) {
+    public List<PDNode> findValidChildrenForBrNode(PDNode brNode) {
         ChildNodeSolver solver = new ChildNodeSolver(pdgInfo.cdg);
         Set<PDNode> resChildren = new LinkedHashSet<>();
-        List<PDNode> firstLevel = solver.find_first_level_children(startNode);
+        List<PDNode> firstLevel = solver.find_first_level_children(brNode);
+        if (firstLevel.isEmpty()) {
+            return firstLevel;
+        }
         for (PDNode node : firstLevel) {
             if (is_valid(node)) {
                 resChildren.add(node);
             }
             else if (node.isBranch()) {
-                List<List<PDNode>> levels = solver.find_all_children_level_order(startNode);
+                List<List<PDNode>> levels = solver.find_all_children_level_order(node);
                 for (List<PDNode> level : levels) {
                     if (level.stream().anyMatch(this::is_valid)) {
                         level.stream()
