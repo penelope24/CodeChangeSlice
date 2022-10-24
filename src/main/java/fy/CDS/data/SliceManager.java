@@ -133,8 +133,8 @@ public class SliceManager {
     public void updateAfterCFGTrack() {
         this.exitNodes = resControlFlowNodes.stream()
                 .filter(node -> node.isTerminal() || node.getLineOfCode() == -1)
-//                .filter(node -> node.getType() != NodeType.BREAK)
                 .collect(Collectors.toSet());
+        this.exitNodes.removeIf(node -> node.getType() == NodeType.BREAK);
         assert Stream.of(resDataFlowNodes, resDataFlowEdges, resControlFlowNodes, resControlFlowEdges)
                 .noneMatch(t -> t.contains(null));
     }

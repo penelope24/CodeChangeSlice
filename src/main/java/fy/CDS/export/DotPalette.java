@@ -35,8 +35,8 @@ public class DotPalette {
         Entry           ("gray"),
         CallSite        ("crimson"),
         Exit            ("gray"),
-        SlicingStart    ("darkseagreen"),
-        DataBind        ("deepskyblue3"),
+        SlicingStart    ("gold"),
+        DataBind        ("default"),
         ControlBind     ("cornsilk1"),
         AST             ("mistyrose3"),
         CLASS           ("bisque"),
@@ -48,7 +48,7 @@ public class DotPalette {
     }
 
     public enum EdgeColor {
-        DataFlow        ("black"),
+        DataFlow        ("red"),
         ControlFLow     ("grey"),
         Call            ("lightcoral"),
         AST             ("firebrick"),
@@ -94,7 +94,7 @@ public class DotPalette {
         if (exitNodes.contains(node))
             return NodeColorType.Exit;
         if (dataBindNodes.contains(node))
-            return NodeColorType.DataBind;
+            return NodeColorType.Default;
         if (controlBindNodes.contains(node))
             return NodeColorType.ControlBind;
         if (callSites.contains(node))

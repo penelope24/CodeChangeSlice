@@ -105,12 +105,12 @@ public class FlowEditor extends ControlFlowSolver {
         if (this.test) {
             return true;
         }
-        if (node.getType() == NodeType.BREAK) {
-            return true;
-        }
-        if (node.getType() == NodeType.CONTINUE) {
-            return true;
-        }
+//        if (node.getType() == NodeType.BREAK) {
+//            return true;
+//        }
+//        if (node.getType() == NodeType.CONTINUE) {
+//            return true;
+//        }
 //        if (node.getType() == NodeType.TRY) {
 //            return true;
 //        }
@@ -121,12 +121,12 @@ public class FlowEditor extends ControlFlowSolver {
         if (this.test) {
             return true;
         }
-        if (node.getType() == NodeType.BREAK) {
-            return true;
-        }
-        if (node.getType() == NodeType.CONTINUE) {
-            return true;
-        }
+//        if (node.getType() == NodeType.BREAK) {
+//            return true;
+//        }
+//        if (node.getType() == NodeType.CONTINUE) {
+//            return true;
+//        }
 //        if (node.getType() == NodeType.TRY) {
 //            return true;
 //        }

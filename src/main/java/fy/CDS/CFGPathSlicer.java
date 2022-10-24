@@ -113,5 +113,7 @@ public class CFGPathSlicer {
         }
     }
 
-
+    public Set<Slice> getCfgPaths() {
+        return cfgPaths;
+    }
 }

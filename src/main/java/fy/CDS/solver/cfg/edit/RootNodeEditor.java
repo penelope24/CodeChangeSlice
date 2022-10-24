@@ -36,6 +36,7 @@ public class RootNodeEditor extends FlowEditor{
         exitNode.setLineOfCode(-1);
         exitNode.setProperty("exit", true);
         exitNode.setTerminal(true);
+        sliceManager.resControlFlowNodes.add(exitNode);
     }
 
     public RootNodeEditor(PDGInfo pdgInfo, CFNode root) {
