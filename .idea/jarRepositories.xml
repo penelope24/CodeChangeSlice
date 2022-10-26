@@ -27,19 +27,24 @@
       <option name="url" value="https://repo.eclipse.org/content/groups/releases/" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="graphs" />
-      <option name="name" value="graphs" />
+      <option name="id" value="repo" />
+      <option name="name" value="repo" />
       <option name="url" value="file://$PROJECT_DIR$/../../opensource/graphs" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="graphs" />
       <option name="name" value="graphs" />
-      <option name="url" value="$PROJECT_DIR$/../../opensource/graphs" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../opensource/graphs" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="graphs" />
       <option name="name" value="graphs" />
       <option name="url" value="file:$PROJECT_DIR$/../../opensource/graphs" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="graphs" />
+      <option name="name" value="graphs" />
+      <option name="url" value="file://$PROJECT_DIR$/../../opensource/graphs" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="jboss.community" />
@@ -54,17 +59,12 @@
     <remote-repository>
       <option name="id" value="graphs" />
       <option name="name" value="graphs" />
-      <option name="url" value="file:/$PROJECT_DIR$/../../opensource/graphs" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="repo" />
-      <option name="name" value="repo" />
-      <option name="url" value="file://$PROJECT_DIR$/../../opensource/graphs" />
+      <option name="url" value="Users/fy/Documents/opensource/graphs" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="graphs" />
       <option name="name" value="graphs" />
-      <option name="url" value="Users/fy/Documents/opensource/graphs" />
+      <option name="url" value="$PROJECT_DIR$/../../opensource/graphs" />
     </remote-repository>
   </component>
 </project>
