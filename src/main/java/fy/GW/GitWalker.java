@@ -116,7 +116,7 @@ public class GitWalker {
         if (diffEntries == null) return null;
         if (diffEntries.size() > 20 || diffEntries.size() < 1) return null;
         diffEntries.removeIf(Objects::isNull);
-        CommitDiff commitDiff = new CommitDiff(repository, projectPath, v1, v2, diffEntries);
+        CommitDiff commitDiff = new CommitDiff(commit, repository, v1, v2, diffEntries);
         List<FileDiff> fileDiffs = diffEntries.stream()
                 .map(FileDiff::new)
                 .collect(Collectors.toList());
@@ -210,13 +210,12 @@ public class GitWalker {
         // check
         fileDiffs.removeIf(fileDiff -> !fileDiff.isValid());
         // return
-        commitDiff.setFileDiffs(fileDiffs);
+//        commitDiff.setFileDiffs(fileDiffs);
         return commitDiff;
     }
 
     public void check () {
-        commitDiffs.removeIf(Objects::isNull);
-        commitDiffs.removeIf(commitDiff -> !commitDiff.isValid());
+
     }
 
     public String getProjectPath() {
