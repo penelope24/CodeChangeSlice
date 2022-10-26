@@ -67,6 +67,8 @@ public class GitWalkNew {
             CommitDiff commitDiff = new CommitDiff(commit, repository, par.getId().name(), commit.getId().name(), diffEntries);
             diffEntries.forEach(entry -> {
                 FileDiffNew fileDiffNew = new FileDiffNew(entry);
+                fileDiffNew.v1 = par.getId().name();
+                fileDiffNew.v2 = commit.getId().name();
                 fileDiffNew.path1 = PathUtils.getOldPath(entry, repository);
                 fileDiffNew.path2 = PathUtils.getNewPath(entry, repository);
                 try {

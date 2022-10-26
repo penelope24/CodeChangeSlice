@@ -38,6 +38,9 @@ public class FileDiffNew {
         if (graph1.DDS.vertexCount() < 1) {
             return false;
         }
+        if (hunks.stream().noneMatch(Hunk::is_v1_valid)) {
+            return false;
+        }
         return true;
     }
 
@@ -46,6 +49,9 @@ public class FileDiffNew {
             return false;
         }
         if (graph2.DDS.vertexCount() < 1) {
+            return false;
+        }
+        if (hunks.stream().noneMatch(Hunk::is_v2_valid)) {
             return false;
         }
         return true;
